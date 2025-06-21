@@ -11,12 +11,11 @@ async function getProveedores(): Promise<Proveedor[]> {
       cache: 'no-store',
     });
     if (!res.ok) {
-      console.error('Failed to fetch providers');
-      return [];
+      throw new Error('No se pudieron cargar los proveedores');
     }
     const data = await res.json();
     // Ensure fecha_creacion is a string for sorting
-    return data.map(p => ({...p, fecha_creacion: p.fecha_creacion || new Date(0).toISOString()}));
+    return data.map((p: Proveedor) => ({...p, fecha_creacion: p.fecha_creacion || new Date(0).toISOString()}));
   } catch (error) {
     console.error(error);
     return [];
