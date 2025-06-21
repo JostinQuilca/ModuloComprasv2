@@ -28,6 +28,8 @@ import DeleteFacturaDialog from "./delete-factura-dialog";
 import { deleteFactura } from "@/app/facturas/actions";
 import { Card } from "../ui/card";
 import { format, parseISO } from "date-fns";
+import { getFacturas, getProveedores, getProductos } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type FacturaConNombre = FacturaCompra & { nombre_proveedor: string };
 type SortKey = keyof FacturaConNombre | 'id';
@@ -68,9 +70,58 @@ const getBadgeClassName = (estado: FacturaCompra['estado']) => {
     }
 };
 
+function FacturasLoadingSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="h-10 w-40" />
+      </div>
+      <Card className="border shadow-sm rounded-lg">
+          <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[150px]">Acciones</TableHead>
+              <TableHead># Factura Proveedor</TableHead>
+              <TableHead>Proveedor</TableHead>
+              <TableHead>F. Emisión</TableHead>
+              <TableHead>F. Vencimiento</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+              <TableHead>Estado</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell className="flex items-center gap-1"><Skeleton className="h-8 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-32" />
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-24" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
-export default function FacturasClient({ initialData, proveedores, productos }: { initialData: FacturaConNombre[], proveedores: Proveedor[], productos: Producto[] }) {
-  const [data, setData] = React.useState<FacturaConNombre[]>(initialData);
+export default function FacturasClient() {
+  const [data, setData] = React.useState<FacturaConNombre[]>([]);
+  const [proveedores, setProveedores] = React.useState<Proveedor[]>([]);
+  const [productos, setProductos] = React.useState<Producto[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
   const [filter, setFilter] = React.useState("");
   const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: "asc" | "desc" } | null>(null);
   
@@ -85,9 +136,41 @@ export default function FacturasClient({ initialData, proveedores, productos }: 
   
   const { toast } = useToast();
 
+  const refreshData = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [facturasData, proveedoresData, productosData] = await Promise.all([
+          getFacturas(),
+          getProveedores(),
+          getProductos(),
+      ]);
+
+      const proveedorMap = new Map(proveedoresData.map(p => [p.cedula_ruc, p.nombre]));
+      const facturasConNombreProveedor = facturasData.map(factura => ({
+        ...factura,
+        nombre_proveedor: proveedorMap.get(factura.proveedor_cedula_ruc) || 'Desconocido',
+      }));
+      
+      setData(facturasConNombreProveedor);
+      setProveedores(proveedoresData);
+      setProductos(productosData);
+
+    } catch (error) {
+      console.error("Failed to fetch data for facturas client:", error);
+      toast({
+        title: "Error de Carga",
+        description: "No se pudieron cargar los datos de las facturas. Intente de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
+
   React.useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
+    refreshData();
+  }, [refreshData]);
 
   const sortedData = React.useMemo(() => {
     let sortableData = [...data];
@@ -158,12 +241,17 @@ export default function FacturasClient({ initialData, proveedores, productos }: 
     const result = await deleteFactura(deletingFactura.id);
     if(result.success) {
       toast({ title: "Éxito", description: result.message });
+      refreshData();
     } else {
       toast({ title: "Error", description: result.message, variant: "destructive" });
     }
     setDeleteDialogOpen(false);
     setDeletingFactura(null);
   };
+
+  if (isLoading) {
+    return <FacturasLoadingSkeleton />;
+  }
 
   return (
     <>
@@ -274,6 +362,7 @@ export default function FacturasClient({ initialData, proveedores, productos }: 
         factura={editingFactura}
         proveedores={proveedores}
         productos={productos}
+        onSuccess={refreshData}
       />
       
       <DeleteFacturaDialog
