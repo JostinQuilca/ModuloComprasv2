@@ -46,9 +46,9 @@ export async function addFactura(
   
   const dataToSubmit = {
       ...validatedFields.data,
-      fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+      fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
       fecha_vencimiento: validatedFields.data.fecha_vencimiento 
-        ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
         : null,
       subtotal: 0,
       iva: 0,
@@ -107,9 +107,9 @@ export async function updateFactura(
 
   const dataToSubmit = {
       ...validatedFields.data,
-      fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+      fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
       fecha_vencimiento: validatedFields.data.fecha_vencimiento
-        ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
         : null,
       usuario_modificacion: 1, // Mock user ID
   };
