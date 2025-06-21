@@ -82,7 +82,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
   useEffect(() => {
     if (state.message) {
       if (state.success) {
-        toast({ title: isEditMode ? "Update Successful" : "Creation Successful", description: state.message });
+        toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: state.message });
         setIsOpen(false);
       } else {
         toast({ title: "Error", description: state.message, variant: "destructive" });
@@ -94,9 +94,9 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? "Edit Supplier" : "Add New Supplier"}</DialogTitle>
+          <DialogTitle>{isEditMode ? "Editar Proveedor" : "Añadir Nuevo Proveedor"}</DialogTitle>
           <DialogDescription>
-            {isEditMode ? "Update the details of the existing supplier." : "Enter the details for the new supplier."}
+            {isEditMode ? "Actualice los detalles del proveedor existente." : "Ingrese los detalles para el nuevo proveedor."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -119,9 +119,9 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
               name="nombre"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Nombre</FormLabel>
                   <FormControl>
-                    <Input placeholder="Supplier Inc." {...field} />
+                    <Input placeholder="Proveedor S.A." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,7 +134,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="contact@supplier.com" {...field} />
+                    <Input placeholder="contacto@proveedor.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,7 +146,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
                   name="telefono"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>Teléfono</FormLabel>
                       <FormControl>
                         <Input placeholder="0991234567" {...field} />
                       </FormControl>
@@ -159,7 +159,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
                   name="ciudad"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel>Ciudad</FormLabel>
                       <FormControl>
                         <Input placeholder="Quito" {...field} />
                       </FormControl>
@@ -173,9 +173,9 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
                 name="direccion"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>Dirección</FormLabel>
                     <FormControl>
-                      <Input placeholder="123 Main St" {...field} />
+                      <Input placeholder="Av. Principal 123" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -187,11 +187,11 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
                   name="tipo_proveedor"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Supplier Type</FormLabel>
+                      <FormLabel>Tipo de Proveedor</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
+                            <SelectValue placeholder="Seleccione un tipo" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -208,7 +208,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
                   name="estado"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <FormLabel>Active</FormLabel>
+                      <FormLabel>Activo</FormLabel>
                       <FormControl>
                         <Switch
                           checked={field.value}
@@ -220,8 +220,8 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
                 />
               </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button type="submit">{isEditMode ? "Save Changes" : "Create Supplier"}</Button>
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
+              <Button type="submit">{isEditMode ? "Guardar Cambios" : "Crear Proveedor"}</Button>
             </DialogFooter>
           </form>
         </Form>

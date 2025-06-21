@@ -109,7 +109,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
     if(result.success) {
       setData(data.filter(p => p.cedula_ruc !== deletingProveedor.cedula_ruc));
       toast({
-        title: "Success",
+        title: "Éxito",
         description: result.message,
         variant: "default",
       });
@@ -131,7 +131,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
           <div className="relative flex-1">
              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Filter suppliers by name, RUC, or email..."
+              placeholder="Filtrar proveedores por nombre, RUC, o email..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="pl-10"
@@ -139,7 +139,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
           </div>
           <Button onClick={handleOpenAddModal} className="shrink-0">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Supplier
+            Añadir Proveedor
           </Button>
         </div>
         <Card className="border shadow-sm rounded-lg">
@@ -150,16 +150,16 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
                   <span className="flex items-center gap-2">Cédula/RUC <ArrowUpDown className="h-4 w-4" /></span>
                 </TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("nombre")}>
-                   <span className="flex items-center gap-2">Name <ArrowUpDown className="h-4 w-4" /></span>
+                   <span className="flex items-center gap-2">Nombre <ArrowUpDown className="h-4 w-4" /></span>
                 </TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>Teléfono</TableHead>
+                <TableHead>Ciudad</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("estado")}>
-                  <span className="flex items-center gap-2">Status <ArrowUpDown className="h-4 w-4" /></span>
+                  <span className="flex items-center gap-2">Estado <ArrowUpDown className="h-4 w-4" /></span>
                 </TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -174,7 +174,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
                     <TableCell>{item.tipo_proveedor}</TableCell>
                     <TableCell>
                       <Badge variant={item.estado ? "default" : "secondary"} className={item.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                        {item.estado ? "Active" : "Inactive"}
+                        {item.estado ? "Activo" : "Inactivo"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -190,7 +190,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
               ) : (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center h-24">
-                    No results found.
+                    No se encontraron resultados.
                   </TableCell>
                 </TableRow>
               )}
@@ -199,7 +199,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
         </Card>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
+            Página {currentPage} de {totalPages}
           </span>
           <div className="flex gap-2">
             <Button
@@ -207,14 +207,14 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
-              Previous
+              Anterior
             </Button>
             <Button
               variant="outline"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
             >
-              Next
+              Siguiente
             </Button>
           </div>
         </div>

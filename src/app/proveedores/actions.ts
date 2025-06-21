@@ -24,7 +24,7 @@ export async function addProveedor(
   if (!validatedFields.success) {
     return {
       success: false,
-      message: "Invalid form data. Please check the fields.",
+      message: "Datos de formulario no válidos. Por favor revise los campos.",
     };
   }
   
@@ -44,13 +44,13 @@ export async function addProveedor(
 
     if (!response.ok) {
        const errorData = await response.json();
-       throw new Error(errorData.message || 'Failed to create supplier.');
+       throw new Error(errorData.message || 'Error al crear el proveedor.');
     }
 
     revalidatePath("/");
-    return { success: true, message: "Supplier added successfully." };
+    return { success: true, message: "Proveedor añadido con éxito." };
   } catch (error: unknown) {
-    return { success: false, message: error instanceof Error ? error.message : "An unknown error occurred." };
+    return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
   }
 }
 
@@ -68,7 +68,7 @@ export async function updateProveedor(
   if (!validatedFields.success) {
      return {
       success: false,
-      message: "Invalid form data. Please check the fields.",
+      message: "Datos de formulario no válidos. Por favor revise los campos.",
     };
   }
 
@@ -88,13 +88,13 @@ export async function updateProveedor(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update supplier.');
+      throw new Error(errorData.message || 'Error al actualizar el proveedor.');
     }
     
     revalidatePath("/");
-    return { success: true, message: "Supplier updated successfully." };
+    return { success: true, message: "Proveedor actualizado con éxito." };
   } catch (error: unknown) {
-     return { success: false, message: error instanceof Error ? error.message : "An unknown error occurred." };
+     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
   }
 }
 
@@ -106,12 +106,12 @@ export async function deleteProveedor(cedula_ruc: string): Promise<ActionRespons
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to delete supplier.');
+      throw new Error(errorData.message || 'Error al eliminar el proveedor.');
     }
 
     revalidatePath("/");
-    return { success: true, message: "Supplier deleted successfully." };
+    return { success: true, message: "Proveedor eliminado con éxito." };
   } catch (error: unknown) {
-    return { success: false, message: error instanceof Error ? error.message : "An unknown error occurred." };
+    return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
   }
 }
