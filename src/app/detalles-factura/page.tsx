@@ -45,7 +45,9 @@ async function getProductos(): Promise<Producto[]> {
             cache: 'no-store',
         });
         if (!res.ok) throw new Error('No se pudieron cargar los productos');
-        return (await res.json()).data;
+        const responseData = await res.json();
+        // API could return { data: [...] } or just [...]
+        return Array.isArray(responseData) ? responseData : responseData.data || [];
     } catch (error) {
         console.error(error);
         return [];
@@ -56,7 +58,7 @@ async function getProductos(): Promise<Producto[]> {
 export default async function DetallesFacturaPage({ searchParams }: { searchParams: { factura_id?: string } }) {
   const facturaId = searchParams.factura_id ? parseInt(searchParams.factura_id, 10) : null;
 
-  if (!facturaId) {
+  if (!facturaId || isNaN(facturaId)) {
     return notFound();
   }
 

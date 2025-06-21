@@ -60,15 +60,7 @@ export default function RootLayout({
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Configuraciones">
-                    <Link href="/configuraciones">
-                      <Settings />
-                      Configuraciones
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
+                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Facturas">
                     <Link href="/facturas">
                       <FileText />
@@ -77,10 +69,10 @@ export default function RootLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Detalles de Factura">
-                    <Link href="/detalles-factura">
-                      <ListChecks />
-                      Detalles de Factura
+                  <SidebarMenuButton asChild tooltip="Configuraciones">
+                    <Link href="/configuraciones">
+                      <Settings />
+                      Configuraciones
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
