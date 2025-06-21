@@ -12,7 +12,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons/logo';
-import { Settings, FileText, ListChecks, DollarSign, ShieldCheck, Scale, KeyRound, Users } from 'lucide-react';
+import { Settings, FileText, ListChecks, DollarSign, ShieldCheck, Scale, KeyRound, Users, Home } from 'lucide-react';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
@@ -45,8 +45,16 @@ export default function RootLayout({
             <SidebarContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Proveedores">
+                  <SidebarMenuButton asChild tooltip="Dashboard">
                     <Link href="/">
+                      <Home />
+                      Dashboard
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Proveedores">
+                    <Link href="/proveedores">
                       <Users />
                       Proveedores
                     </Link>

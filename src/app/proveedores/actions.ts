@@ -16,7 +16,7 @@ function formatZodErrors(error: z.ZodError): string {
     const errorMessages = Object.entries(fieldErrors)
         .map(([fieldName, errors]) => `${fieldName}: ${errors.join(', ')}`)
         .join('; ');
-    return errorMessages;
+    return `Datos de formulario no válidos: ${errorMessages}`;
 }
 
 export async function addProveedor(
@@ -32,7 +32,7 @@ export async function addProveedor(
   if (!validatedFields.success) {
     return {
       success: false,
-      message: `Datos de formulario no válidos: ${formatZodErrors(validatedFields.error)}`,
+      message: formatZodErrors(validatedFields.error),
     };
   }
   
@@ -56,6 +56,7 @@ export async function addProveedor(
     }
 
     revalidatePath("/");
+    revalidatePath("/proveedores");
     return { success: true, message: "Proveedor añadido con éxito." };
   } catch (error: unknown) {
     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
@@ -76,7 +77,7 @@ export async function updateProveedor(
   if (!validatedFields.success) {
      return {
       success: false,
-      message: `Datos de formulario no válidos: ${formatZodErrors(validatedFields.error)}`,
+      message: formatZodErrors(validatedFields.error),
     };
   }
 
@@ -100,6 +101,7 @@ export async function updateProveedor(
     }
     
     revalidatePath("/");
+    revalidatePath("/proveedores");
     return { success: true, message: "Proveedor actualizado con éxito." };
   } catch (error: unknown) {
      return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
@@ -118,6 +120,7 @@ export async function deleteProveedor(cedula_ruc: string): Promise<ActionRespons
     }
 
     revalidatePath("/");
+    revalidatePath("/proveedores");
     return { success: true, message: "Proveedor eliminado con éxito." };
   } catch (error: unknown) {
     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
