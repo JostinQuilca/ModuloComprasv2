@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import { useFormState } from "react-dom";
+import { useEffect, useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -77,7 +76,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
   }, [proveedor, form, isOpen]);
 
   const action = isEditMode ? updateProveedor.bind(null, proveedor.cedula_ruc) : addProveedor;
-  const [state, formAction] = useFormState(action, { success: false, message: "" });
+  const [state, formAction] = useActionState(action, { success: false, message: "" });
   
   useEffect(() => {
     if (state.message) {
