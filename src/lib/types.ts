@@ -44,7 +44,7 @@ export const FacturaCompraSchema = z.object({
   proveedor_cedula_ruc: z.string().min(1, "El proveedor es requerido."),
   numero_factura: z.string().min(1, "El número de factura es requerido."),
   fecha_emision: z.date({ required_error: "La fecha de emisión es requerida."}),
-  fecha_vencimiento: z.date({ required_error: "La fecha de vencimiento es requerida."}),
+  fecha_vencimiento: z.date({ invalid_type_error: "Fecha de vencimiento inválida." }).nullable(),
   subtotal: z.number().optional().default(0),
   iva: z.number().optional().default(0),
   total: z.number().optional().default(0),

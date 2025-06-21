@@ -42,26 +42,28 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       proveedor_cedula_ruc: "",
       numero_factura: "",
       fecha_emision: new Date(),
-      fecha_vencimiento: new Date(),
-      estado: "Pendiente",
+      fecha_vencimiento: null,
+      estado: "Registrada",
     },
   });
 
   useEffect(() => {
-    if (factura) {
-      form.reset({
-        ...factura,
-        fecha_emision: parseISO(factura.fecha_emision),
-        fecha_vencimiento: factura.fecha_vencimiento ? parseISO(factura.fecha_vencimiento) : new Date(),
-      });
-    } else {
-      form.reset({
-        proveedor_cedula_ruc: "",
-        numero_factura: "",
-        fecha_emision: new Date(),
-        fecha_vencimiento: new Date(),
-        estado: "Pendiente",
-      });
+    if (isOpen) {
+      if (factura) {
+        form.reset({
+          ...factura,
+          fecha_emision: parseISO(factura.fecha_emision),
+          fecha_vencimiento: factura.fecha_vencimiento ? parseISO(factura.fecha_vencimiento) : null,
+        });
+      } else {
+        form.reset({
+          proveedor_cedula_ruc: "",
+          numero_factura: "",
+          fecha_emision: new Date(),
+          fecha_vencimiento: null,
+          estado: "Registrada",
+        });
+      }
     }
   }, [factura, form, isOpen]);
 
@@ -222,6 +224,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="Registrada">Registrada</SelectItem>
                         <SelectItem value="Pendiente">Pendiente</SelectItem>
                         <SelectItem value="Pagada">Pagada</SelectItem>
                         <SelectItem value="Anulada">Anulada</SelectItem>

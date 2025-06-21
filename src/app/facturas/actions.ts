@@ -25,11 +25,12 @@ export async function addFactura(
   prevState: any,
   formData: FormData
 ): Promise<ActionResponse> {
+  const fechaVencimientoValue = formData.get('fecha_vencimiento');
   const rawData = {
       proveedor_cedula_ruc: formData.get('proveedor_cedula_ruc'),
       numero_factura: formData.get('numero_factura'),
       fecha_emision: new Date(formData.get('fecha_emision') as string),
-      fecha_vencimiento: new Date(formData.get('fecha_vencimiento') as string),
+      fecha_vencimiento: fechaVencimientoValue ? new Date(fechaVencimientoValue as string) : null,
       estado: formData.get('estado'),
   };
   
@@ -45,7 +46,9 @@ export async function addFactura(
   const dataToSubmit = {
       ...validatedFields.data,
       fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-      fecha_vencimiento: format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+      fecha_vencimiento: validatedFields.data.fecha_vencimiento 
+        ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        : null,
       subtotal: 0,
       iva: 0,
       total: 0,
@@ -82,13 +85,14 @@ export async function updateFactura(
   prevState: any,
   formData: FormData
 ): Promise<ActionResponse> {
+    const fechaVencimientoValue = formData.get('fecha_vencimiento');
     const rawData = {
       proveedor_cedula_ruc: formData.get('proveedor_cedula_ruc'),
       numero_factura: formData.get('numero_factura'),
       fecha_emision: new Date(formData.get('fecha_emision') as string),
-      fecha_vencimiento: new Date(formData.get('fecha_vencimiento') as string),
+      fecha_vencimiento: fechaVencimientoValue ? new Date(fechaVencimientoValue as string) : null,
       estado: formData.get('estado'),
-  };
+    };
 
   const validatedFields = FacturaCompraSchema.safeParse(rawData);
 
@@ -102,7 +106,9 @@ export async function updateFactura(
   const dataToSubmit = {
       ...validatedFields.data,
       fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-      fecha_vencimiento: format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+      fecha_vencimiento: validatedFields.data.fecha_vencimiento
+        ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        : null,
       usuario_modificacion: 1, // Mock user ID
   };
   
