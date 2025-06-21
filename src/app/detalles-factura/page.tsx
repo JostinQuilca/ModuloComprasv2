@@ -13,6 +13,11 @@ async function getFactura(id: number): Promise<(FacturaCompra & {nombre_proveedo
         }
         const factura = await res.json();
 
+        if (typeof factura !== 'object' || factura === null) {
+            console.error(`Invalid factura data received for ID ${id}:`, factura);
+            return null;
+        }
+
         if (factura && factura.proveedor_cedula_ruc) {
             const provRes = await fetch(`https://modulocompras-production-843f.up.railway.app/api/proveedores/${factura.proveedor_cedula_ruc}`, { cache: 'no-store' });
             if (!provRes.ok) {
@@ -61,7 +66,7 @@ async function getProductos(): Promise<Producto[]> {
         }
         const responseData = await res.json();
         // API could return { data: [...] } or just [...]
-        return Array.isArray(responseData) ? responseData : responseData.data || [];
+        return Array.isArray(responseData) ? responseData : (responseData && Array.isArray(responseData.data)) ? responseData.data : [];
     } catch (error) {
         console.error(error);
         return [];

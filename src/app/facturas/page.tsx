@@ -46,7 +46,7 @@ async function getProductos(): Promise<Producto[]> {
           throw new Error(`Failed to fetch productos: ${res.status} ${res.statusText} - ${errorText}`);
         }
         const responseData = await res.json();
-        return Array.isArray(responseData) ? responseData : responseData.data || [];
+        return Array.isArray(responseData) ? responseData : (responseData && Array.isArray(responseData.data)) ? responseData.data : [];
     } catch (error) {
         console.error(error);
         return [];

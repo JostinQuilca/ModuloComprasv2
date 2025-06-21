@@ -226,7 +226,7 @@ export default function FacturasClient({ initialData, proveedores, productos }: 
                     <TableCell>{item.nombre_proveedor}</TableCell>
                     <TableCell>{formatUTCDate(item.fecha_emision)}</TableCell>
                     <TableCell>{formatUTCDate(item.fecha_vencimiento)}</TableCell>
-                    <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">${(item.total || 0).toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant={getBadgeVariant(item.estado)} 
                              className={getBadgeClassName(item.estado)}>
