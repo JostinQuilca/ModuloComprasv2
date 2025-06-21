@@ -1,3 +1,4 @@
+
 import FacturasClient from '@/components/facturas/facturas-client';
 import type { FacturaCompra, Proveedor, Producto } from '@/lib/types';
 
@@ -7,7 +8,8 @@ async function getFacturas(): Promise<FacturaCompra[]> {
       cache: 'no-store',
     });
     if (!res.ok) {
-      throw new Error('No se pudieron cargar las facturas');
+      const errorText = await res.text();
+      throw new Error(`Failed to fetch facturas: ${res.status} ${res.statusText} - ${errorText}`);
     }
     const data = await res.json();
     return data;
@@ -23,7 +25,8 @@ async function getProveedores(): Promise<Proveedor[]> {
       cache: 'no-store',
     });
     if (!res.ok) {
-      throw new Error('No se pudieron cargar los proveedores');
+      const errorText = await res.text();
+      throw new Error(`Failed to fetch proveedores: ${res.status} ${res.statusText} - ${errorText}`);
     }
     return await res.json();
   } catch (error) {
@@ -37,7 +40,10 @@ async function getProductos(): Promise<Producto[]> {
         const res = await fetch('https://adapi-production-16e6.up.railway.app/api/v1/productos/', {
             cache: 'no-store',
         });
-        if (!res.ok) throw new Error('No se pudieron cargar los productos');
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Failed to fetch productos: ${res.status} ${res.statusText} - ${errorText}`);
+        }
         const responseData = await res.json();
         return Array.isArray(responseData) ? responseData : responseData.data || [];
     } catch (error) {

@@ -7,7 +7,8 @@ async function getProveedores(): Promise<Proveedor[]> {
       cache: 'no-store', // Ensure fresh data on each request
     });
     if (!res.ok) {
-      throw new Error('No se pudieron cargar los proveedores');
+      const errorText = await res.text();
+      throw new Error(`Failed to fetch proveedores: ${res.status} ${res.statusText} - ${errorText}`);
     }
     const data = await res.json();
     return data;

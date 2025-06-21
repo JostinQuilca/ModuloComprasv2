@@ -7,7 +7,10 @@ async function getFactura(id: number): Promise<(FacturaCompra & {nombre_proveedo
         const res = await fetch(`https://modulocompras-production-843f.up.railway.app/api/facturas/${id}`, {
             cache: 'no-store',
         });
-        if (!res.ok) return null;
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Failed to fetch factura ${id}: ${res.status} ${res.statusText} - ${errorText}`);
+        }
         const factura = await res.json();
 
         if (factura && factura.proveedor_cedula_ruc) {
@@ -35,7 +38,10 @@ async function getDetalles(): Promise<FacturaDetalle[]> {
     const res = await fetch('https://modulocompras-production-843f.up.railway.app/api/detalles-factura', {
       cache: 'no-store',
     });
-    if (!res.ok) throw new Error('No se pudieron cargar los detalles de factura');
+    if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to fetch detalles-factura: ${res.status} ${res.statusText} - ${errorText}`);
+    }
     return await res.json();
   } catch (error) {
     console.error(error);
@@ -48,7 +54,10 @@ async function getProductos(): Promise<Producto[]> {
         const res = await fetch('https://adapi-production-16e6.up.railway.app/api/v1/productos/', {
             cache: 'no-store',
         });
-        if (!res.ok) throw new Error('No se pudieron cargar los productos');
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Failed to fetch productos: ${res.status} ${res.statusText} - ${errorText}`);
+        }
         const responseData = await res.json();
         // API could return { data: [...] } or just [...]
         return Array.isArray(responseData) ? responseData : responseData.data || [];
