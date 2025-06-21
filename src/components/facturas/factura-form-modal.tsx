@@ -33,7 +33,6 @@ interface FacturaFormModalProps {
   factura: (FacturaCompra & { nombre_proveedor: string }) | null;
   proveedores: Proveedor[];
   productos: Producto[];
-  onSuccess: () => void;
 }
 
 type FacturaFormData = z.infer<typeof FacturaCompraSchema>;
@@ -44,7 +43,7 @@ type TempDetalle = Omit<FacturaDetalle, 'id' | 'factura_id' | 'nombre_producto'>
 
 const IVA_RATE = 0.15;
 
-export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedores, productos, onSuccess }: FacturaFormModalProps) {
+export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedores, productos }: FacturaFormModalProps) {
   const isEditMode = !!factura;
   const { toast } = useToast();
   const [isSaving, startTransition] = useTransition();
@@ -163,7 +162,6 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         if (result.success) {
           toast({ title: "Actualización Exitosa", description: result.message });
           setIsOpen(false);
-          onSuccess();
         } else {
           toast({ title: "Error", description: result.message, variant: "destructive" });
         }
@@ -215,7 +213,6 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       }
       
       setIsOpen(false);
-      onSuccess();
     });
   };
 
