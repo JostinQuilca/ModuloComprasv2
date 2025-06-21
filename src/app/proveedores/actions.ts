@@ -11,6 +11,14 @@ type ActionResponse = {
   message: string;
 };
 
+function formatZodErrors(error: z.ZodError): string {
+    const { fieldErrors } = error.flatten();
+    const errorMessages = Object.entries(fieldErrors)
+        .map(([fieldName, errors]) => `${fieldName}: ${errors.join(', ')}`)
+        .join('; ');
+    return errorMessages;
+}
+
 export async function addProveedor(
   prevState: any,
   formData: FormData
@@ -24,7 +32,7 @@ export async function addProveedor(
   if (!validatedFields.success) {
     return {
       success: false,
-      message: "Datos de formulario no válidos. Por favor revise los campos.",
+      message: `Datos de formulario no válidos: ${formatZodErrors(validatedFields.error)}`,
     };
   }
   
@@ -68,7 +76,7 @@ export async function updateProveedor(
   if (!validatedFields.success) {
      return {
       success: false,
-      message: "Datos de formulario no válidos. Por favor revise los campos.",
+      message: `Datos de formulario no válidos: ${formatZodErrors(validatedFields.error)}`,
     };
   }
 

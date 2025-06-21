@@ -89,6 +89,20 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
     }
   }, [state, toast, isEditMode, setIsOpen]);
 
+  const onSubmit = (data: z.infer<typeof ProveedorSchema>) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'estado') {
+        if (value === true) {
+          formData.append(key, 'on');
+        }
+      } else if (value !== null && value !== undefined) {
+        formData.append(key, String(value));
+      }
+    });
+    formAction(formData);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
@@ -99,7 +113,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form action={formAction} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="cedula_ruc"
