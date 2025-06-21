@@ -5,6 +5,7 @@ import { z } from "zod";
 import { FacturaDetalleSchema } from "@/lib/types";
 
 const API_URL = "https://modulocompras-production-843f.up.railway.app/api/detalles-factura";
+const IVA_RATE = 0.15;
 
 type ActionResponse = {
   success: boolean;
@@ -60,7 +61,19 @@ export async function addDetalle(
       return { success: false, message: "No se pudo encontrar el nombre del producto." };
   }
 
-  const dataToSubmit = { ...validatedFields.data, nombre_producto, usuario_creacion: 1 };
+  const { cantidad, precio_unitario, aplica_iva } = validatedFields.data;
+  const subtotal = cantidad * precio_unitario;
+  const iva = aplica_iva ? subtotal * IVA_RATE : 0;
+  const total = subtotal + iva;
+
+  const dataToSubmit = { 
+    ...validatedFields.data,
+    nombre_producto,
+    subtotal,
+    iva,
+    total,
+    usuario_creacion: 1 
+  };
 
   try {
     const response = await fetch(API_URL, {
@@ -105,7 +118,19 @@ export async function updateDetalle(
       return { success: false, message: "No se pudo encontrar el nombre del producto." };
   }
   
-  const dataToSubmit = { ...validatedFields.data, nombre_producto, usuario_modificacion: 1 };
+  const { cantidad, precio_unitario, aplica_iva } = validatedFields.data;
+  const subtotal = cantidad * precio_unitario;
+  const iva = aplica_iva ? subtotal * IVA_RATE : 0;
+  const total = subtotal + iva;
+
+  const dataToSubmit = { 
+    ...validatedFields.data,
+    nombre_producto,
+    subtotal,
+    iva,
+    total,
+    usuario_modificacion: 1 
+  };
   
   try {
     const response = await fetch(`${API_URL}/${id}`, {
