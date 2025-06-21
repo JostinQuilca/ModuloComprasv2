@@ -11,9 +11,14 @@ async function getProveedores(): Promise<Proveedor[]> {
       cache: 'no-store',
     });
     if (!res.ok) {
-      throw new Error('No se pudieron cargar los proveedores');
+      const errorText = await res.text();
+      throw new Error(`Failed to fetch proveedores: ${res.status} ${res.statusText} - ${errorText}`);
     }
     const data = await res.json();
+    if (!Array.isArray(data)) {
+        console.error("API response for proveedores is not an array:", data);
+        return [];
+    }
     // Ensure fecha_creacion is a string for sorting
     return data.map((p: Proveedor) => ({...p, fecha_creacion: p.fecha_creacion || new Date(0).toISOString()}));
   } catch (error) {

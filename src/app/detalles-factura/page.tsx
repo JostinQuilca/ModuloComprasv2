@@ -42,7 +42,8 @@ async function getDetalles(): Promise<FacturaDetalle[]> {
         const errorText = await res.text();
         throw new Error(`Failed to fetch detalles-factura: ${res.status} ${res.statusText} - ${errorText}`);
     }
-    return await res.json();
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error(error);
     return [];

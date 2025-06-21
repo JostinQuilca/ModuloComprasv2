@@ -11,7 +11,7 @@ async function getProveedores(): Promise<Proveedor[]> {
       throw new Error(`Failed to fetch proveedores: ${res.status} ${res.statusText} - ${errorText}`);
     }
     const data = await res.json();
-    return data;
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error(error);
     return [];

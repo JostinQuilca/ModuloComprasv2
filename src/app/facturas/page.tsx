@@ -12,7 +12,7 @@ async function getFacturas(): Promise<FacturaCompra[]> {
       throw new Error(`Failed to fetch facturas: ${res.status} ${res.statusText} - ${errorText}`);
     }
     const data = await res.json();
-    return data;
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error(error);
     return [];
@@ -28,7 +28,8 @@ async function getProveedores(): Promise<Proveedor[]> {
       const errorText = await res.text();
       throw new Error(`Failed to fetch proveedores: ${res.status} ${res.statusText} - ${errorText}`);
     }
-    return await res.json();
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error(error);
     return [];
