@@ -41,22 +41,22 @@ export type Producto = z.infer<typeof ProductoSchema>;
 
 export const FacturaCompraSchema = z.object({
   id: z.number().optional(),
-  proveedor_id: z.string().min(1, "El proveedor es requerido."),
+  proveedor_cedula_ruc: z.string().min(1, "El proveedor es requerido."),
   numero_factura: z.string().min(1, "El número de factura es requerido."),
   fecha_emision: z.date({ required_error: "La fecha de emisión es requerida."}),
   fecha_vencimiento: z.date({ required_error: "La fecha de vencimiento es requerida."}),
   subtotal: z.number().optional().default(0),
   iva: z.number().optional().default(0),
   total: z.number().optional().default(0),
-  estado: z.enum(["Pendiente", "Pagada", "Anulada"]),
+  estado: z.enum(["Pendiente", "Pagada", "Anulada", "Registrada"]),
 });
 
 export type FacturaCompra = {
   id: number;
-  proveedor_id: string;
+  proveedor_cedula_ruc: string;
   numero_factura: string;
   fecha_emision: string;
-  fecha_vencimiento: string;
+  fecha_vencimiento: string | null;
   subtotal: number;
   iva: number;
   total: number;

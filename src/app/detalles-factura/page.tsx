@@ -10,7 +10,7 @@ async function getFactura(id: number): Promise<(FacturaCompra & {nombre_proveedo
         if (!res.ok) return null;
         const factura = await res.json();
 
-        const provRes = await fetch(`https://modulocompras-production-843f.up.railway.app/api/proveedores/${factura.proveedor_id}`, { cache: 'no-store' });
+        const provRes = await fetch(`https://modulocompras-production-843f.up.railway.app/api/proveedores/${factura.proveedor_cedula_ruc}`, { cache: 'no-store' });
         if (!provRes.ok) {
             factura.nombre_proveedor = 'Desconocido';
         } else {

@@ -26,7 +26,7 @@ export async function addFactura(
   formData: FormData
 ): Promise<ActionResponse> {
   const rawData = {
-      proveedor_id: formData.get('proveedor_id'),
+      proveedor_cedula_ruc: formData.get('proveedor_cedula_ruc'),
       numero_factura: formData.get('numero_factura'),
       fecha_emision: new Date(formData.get('fecha_emision') as string),
       fecha_vencimiento: new Date(formData.get('fecha_vencimiento') as string),
@@ -83,7 +83,7 @@ export async function updateFactura(
   formData: FormData
 ): Promise<ActionResponse> {
     const rawData = {
-      proveedor_id: formData.get('proveedor_id'),
+      proveedor_cedula_ruc: formData.get('proveedor_cedula_ruc'),
       numero_factura: formData.get('numero_factura'),
       fecha_emision: new Date(formData.get('fecha_emision') as string),
       fecha_vencimiento: new Date(formData.get('fecha_vencimiento') as string),

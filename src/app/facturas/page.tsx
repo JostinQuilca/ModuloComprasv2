@@ -42,7 +42,7 @@ export default async function FacturasPage() {
   // Add provider name to each invoice
   const facturasConNombreProveedor = facturas.map(factura => ({
     ...factura,
-    nombre_proveedor: proveedorMap.get(factura.proveedor_id) || 'Desconocido',
+    nombre_proveedor: proveedorMap.get(factura.proveedor_cedula_ruc) || 'Desconocido',
   }));
 
   return (

@@ -39,7 +39,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
   const form = useForm<FacturaFormData>({
     resolver: zodResolver(FacturaCompraSchema),
     defaultValues: {
-      proveedor_id: "",
+      proveedor_cedula_ruc: "",
       numero_factura: "",
       fecha_emision: new Date(),
       fecha_vencimiento: new Date(),
@@ -52,11 +52,11 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       form.reset({
         ...factura,
         fecha_emision: parseISO(factura.fecha_emision),
-        fecha_vencimiento: parseISO(factura.fecha_vencimiento),
+        fecha_vencimiento: factura.fecha_vencimiento ? parseISO(factura.fecha_vencimiento) : new Date(),
       });
     } else {
       form.reset({
-        proveedor_id: "",
+        proveedor_cedula_ruc: "",
         numero_factura: "",
         fecha_emision: new Date(),
         fecha_vencimiento: new Date(),
@@ -107,7 +107,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="proveedor_id"
+              name="proveedor_cedula_ruc"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Proveedor</FormLabel>
