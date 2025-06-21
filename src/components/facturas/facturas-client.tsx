@@ -114,9 +114,9 @@ export default function FacturasClient({ initialData, proveedores, productos }: 
   const filteredData = React.useMemo(() =>
     sortedData.filter(
       (item) =>
-        item.nombre_proveedor.toLowerCase().includes(filter.toLowerCase()) ||
-        item.numero_factura_proveedor.toLowerCase().includes(filter.toLowerCase()) ||
-        item.estado.toLowerCase().includes(filter.toLowerCase())
+        (item.nombre_proveedor || "").toLowerCase().includes(filter.toLowerCase()) ||
+        (item.numero_factura_proveedor || "").toLowerCase().includes(filter.toLowerCase()) ||
+        (item.estado || "").toLowerCase().includes(filter.toLowerCase())
     ),
     [sortedData, filter]
   );

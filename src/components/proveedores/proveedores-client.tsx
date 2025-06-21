@@ -71,9 +71,9 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
   const filteredData = React.useMemo(() =>
     sortedData.filter(
       (item) =>
-        item.nombre.toLowerCase().includes(filter.toLowerCase()) ||
-        item.cedula_ruc.includes(filter) ||
-        item.email.toLowerCase().includes(filter.toLowerCase())
+        (item.nombre || "").toLowerCase().includes(filter.toLowerCase()) ||
+        (item.cedula_ruc || "").includes(filter) ||
+        (item.email || "").toLowerCase().includes(filter.toLowerCase())
     ),
     [sortedData, filter]
   );
