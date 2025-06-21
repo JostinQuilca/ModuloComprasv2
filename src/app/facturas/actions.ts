@@ -146,7 +146,11 @@ export async function updateFactura(
     
     revalidatePath("/facturas");
     revalidatePath(`/detalles-factura?factura_id=${id}`);
-    return { success: true, message: "Factura actualizada con éxito." };
+    return { 
+        success: true, 
+        message: "Factura actualizada con éxito. Redirigiendo...",
+        redirectUrl: `/detalles-factura?factura_id=${id}`
+    };
   } catch (error: unknown) {
      return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
   }
