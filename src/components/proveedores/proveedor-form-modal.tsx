@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useActionState } from "react";
+import { useEffect, useActionState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,6 +43,7 @@ interface ProveedorFormModalProps {
 export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: ProveedorFormModalProps) {
   const isEditMode = !!proveedor;
   const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof ProveedorSchema>>({
     resolver: zodResolver(ProveedorSchema),
@@ -100,7 +101,9 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
         formData.append(key, String(value));
       }
     });
-    formAction(formData);
+    startTransition(() => {
+      formAction(formData);
+    });
   };
 
   return (
@@ -201,7 +204,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tipo de Proveedor</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccione un tipo" />
@@ -234,7 +237,7 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
               </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-              <Button type="submit">{isEditMode ? "Guardar Cambios" : "Crear Proveedor"}</Button>
+              <Button type="submit" disabled={isPending}>{isPending ? "Guardando..." : (isEditMode ? "Guardar Cambios" : "Crear Proveedor")}</Button>
             </DialogFooter>
           </form>
         </Form>
