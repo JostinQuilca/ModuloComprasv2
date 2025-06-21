@@ -25,6 +25,7 @@ import { Combobox } from "../ui/combobox";
 import { Separator } from "../ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Switch } from "../ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface FacturaFormModalProps {
   isOpen: boolean;
@@ -188,7 +189,11 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         const detailFormData = new FormData();
         Object.entries(detalle).forEach(([key, value]) => {
            if (value !== null && value !== undefined) {
-               detailFormData.append(key, String(value));
+                if (key === 'aplica_iva') {
+                    if (value === true) detailFormData.append(key, 'on');
+                } else {
+                    detailFormData.append(key, String(value));
+                }
            }
         });
         detailFormData.append('factura_id', String(newFacturaId));
