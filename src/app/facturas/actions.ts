@@ -25,7 +25,13 @@ async function handleApiError(response: Response, defaultMessage: string): Promi
     let errorMessage = defaultMessage;
     try {
         const errorBody = await response.json();
-        errorMessage = errorBody.message || JSON.stringify(errorBody);
+        if (errorBody.error && typeof errorBody.error === 'string') {
+          errorMessage = errorBody.error;
+        } else if (errorBody.message) {
+          errorMessage = errorBody.message
+        } else {
+          errorMessage = JSON.stringify(errorBody);
+        }
     } catch {
         // Ignore if the body is not JSON, the default message will be used.
     }
@@ -57,6 +63,9 @@ export async function addFactura(
   
   const dataToSubmit = {
       ...validatedFields.data,
+      // The backend requires a non-null value for numero_factura.
+      // We send a temporary unique value to prevent a database error.
+      numero_factura: `TEMP-${Date.now()}`,
       fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
       fecha_vencimiento: validatedFields.data.fecha_vencimiento 
         ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")

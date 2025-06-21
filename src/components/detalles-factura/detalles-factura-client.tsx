@@ -29,13 +29,22 @@ interface DetallesFacturaClientProps {
     productos: Producto[];
 }
 
-const formatUTCDate = (dateString: string | null) => {
+const formatUTCDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'N/A';
     try {
+        // The date string from the API might not be a full ISO string, so parseISO is robust.
         const date = parseISO(dateString);
+        // Date object automatically holds the date in UTC. We just need to format it.
+        // We add the user's timezone offset to display the date as it was intended, regardless of user's timezone.
         const userTimezoneOffset = date.getTimezoneOffset() * 60000;
         return format(new Date(date.getTime() + userTimezoneOffset), "dd MMM, yyyy", { locale: es });
     } catch (error) {
+        // Fallback for potentially invalid date formats
+        const simpleDate = new Date(dateString);
+        if (!isNaN(simpleDate.getTime())) {
+            const userTimezoneOffset = simpleDate.getTimezoneOffset() * 60000;
+            return format(new Date(simpleDate.getTime() + userTimezoneOffset), "dd MMM, yyyy", { locale: es });
+        }
         console.error("Invalid date string:", dateString, error);
         return 'Fecha inválida';
     }

@@ -23,7 +23,13 @@ async function handleApiError(response: Response, defaultMessage: string): Promi
     let errorMessage = defaultMessage;
     try {
         const errorBody = await response.json();
-        errorMessage = errorBody.message || JSON.stringify(errorBody);
+        if (errorBody.error && typeof errorBody.error === 'string') {
+          errorMessage = errorBody.error;
+        } else if (errorBody.message) {
+          errorMessage = errorBody.message
+        } else {
+          errorMessage = JSON.stringify(errorBody);
+        }
     } catch {
         // Ignore if the body is not JSON, the default message will be used.
     }
