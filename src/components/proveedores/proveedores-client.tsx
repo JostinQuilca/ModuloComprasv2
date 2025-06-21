@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import ProveedorFormModal from "./proveedor-form-modal";
 import DeleteProveedorDialog from "./delete-proveedor-dialog";
 import { deleteProveedor } from "@/app/proveedores/actions";
+import { Card } from "../ui/card";
 
 type SortKey = keyof Proveedor;
 
@@ -42,6 +43,11 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
   const itemsPerPage = 10;
   
   const { toast } = useToast();
+
+  React.useEffect(() => {
+    setData(initialData);
+    setCurrentPage(1); // Reset to first page when data changes
+  }, [initialData]);
 
   const sortedData = React.useMemo(() => {
     let sortableData = [...data];
@@ -72,13 +78,13 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
     [sortedData, filter]
   );
   
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+
   const paginatedData = React.useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredData, currentPage, itemsPerPage]);
   
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
   const handleSort = (key: SortKey) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -107,7 +113,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
     
     const result = await deleteProveedor(deletingProveedor.cedula_ruc);
     if(result.success) {
-      setData(data.filter(p => p.cedula_ruc !== deletingProveedor.cedula_ruc));
+      // Data will be re-fetched by revalidatePath, no need to manually update state
       toast({
         title: "Éxito",
         description: result.message,
@@ -133,12 +139,15 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
             <Input
               placeholder="Filtrar proveedores por nombre, RUC, o email..."
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1); // Reset page on filter change
+              }}
               className="pl-10"
             />
           </div>
           <Button onClick={handleOpenAddModal} className="shrink-0">
-            <PlusCircle className="mr-2 h-4 w-4" />
+            <PlusCircle className="mr-2 h-5 w-5" />
             Añadir Proveedor
           </Button>
         </div>
@@ -168,10 +177,10 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
                   <TableRow key={item.cedula_ruc}>
                     <TableCell>
                       <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(item)}>
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-5 w-5" />
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(item)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-5 w-5 text-destructive" />
                       </Button>
                     </TableCell>
                     <TableCell className="font-medium">{item.cedula_ruc}</TableCell>
@@ -235,11 +244,3 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
     </>
   );
 }
-
-// Minimal Card component for styling consistency
-const Card = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={React.useMemo(() => `rounded-xl border bg-card text-card-foreground ${className || ''}`, [className])}
-    {...props}
-  />
-);
