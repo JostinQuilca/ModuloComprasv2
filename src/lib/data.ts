@@ -8,7 +8,9 @@ async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(`API request failed: ${res.status} ${res.statusText} - ${errorText}`);
+            // Log the error instead of throwing, to prevent page crashes on API errors.
+            console.error(`API request failed to ${url}: ${res.status} ${res.statusText} - ${errorText}`);
+            return defaultReturnValue;
         }
         // Handle cases where response might be empty
         const text = await res.text();
@@ -59,13 +61,9 @@ export async function getFactura(id: number): Promise<(FacturaCompra & {nombre_p
 
     let nombre_proveedor = 'Desconocido';
     if (factura.proveedor_cedula_ruc) {
-        try {
-            const proveedor = await fetchData<Proveedor | null>(`${API_BASE_URL_COMPRAS}/proveedores/${factura.proveedor_cedula_ruc}`, null);
-            if (proveedor && proveedor.nombre) {
-                nombre_proveedor = proveedor.nombre;
-            }
-        } catch (error) {
-            console.error(`Failed to fetch provider for factura ${id}`, error);
+        const proveedor = await fetchData<Proveedor | null>(`${API_BASE_URL_COMPRAS}/proveedores/${factura.proveedor_cedula_ruc}`, null);
+        if (proveedor && proveedor.nombre) {
+            nombre_proveedor = proveedor.nombre;
         }
     }
     
