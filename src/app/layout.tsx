@@ -35,17 +35,17 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background">
         <SidebarProvider>
-          <Sidebar>
+          <Sidebar collapsible="icon">
             <SidebarHeader>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
                 <Logo className="h-6 w-6 text-primary" />
-                <span className="text-xl font-semibold">Procuria</span>
+                <span className="font-semibold text-xl group-data-[collapsible=icon]:hidden">Procuria</span>
               </div>
             </SidebarHeader>
             <SidebarContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Proveedores">
                     <Link href="/">
                       <Users />
                       Proveedores
@@ -53,7 +53,7 @@ export default function RootLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Configuraciones">
                     <Link href="/configuraciones">
                       <Settings />
                       Configuraciones
@@ -61,7 +61,7 @@ export default function RootLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Facturas">
                     <Link href="/facturas">
                       <FileText />
                       Facturas
@@ -69,7 +69,7 @@ export default function RootLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Detalles de Factura">
                     <Link href="/detalles-factura">
                       <ListChecks />
                       Detalles de Factura
@@ -77,7 +77,7 @@ export default function RootLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Pagos a Proveedores">
                     <Link href="/pagos">
                       <DollarSign />
                       Pagos a Proveedores
@@ -85,7 +85,7 @@ export default function RootLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Auditoría">
                     <Link href="/auditoria">
                       <ShieldCheck />
                       Auditoría
@@ -93,7 +93,7 @@ export default function RootLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                  <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Saldos de Proveedor">
                     <Link href="/saldos">
                       <Scale />
                       Saldos de Proveedor
@@ -101,7 +101,7 @@ export default function RootLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                  <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Tokens API">
                     <Link href="/tokens">
                       <KeyRound />
                       Tokens API
@@ -113,7 +113,7 @@ export default function RootLayout({
           </Sidebar>
           <SidebarInset>
              <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
-               <SidebarTrigger className="md:hidden" />
+               <SidebarTrigger />
              </header>
             <div className="min-h-[calc(100vh-4rem)] w-full">
               {children}
