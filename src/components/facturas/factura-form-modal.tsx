@@ -40,9 +40,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
     resolver: zodResolver(FacturaCompraSchema),
     defaultValues: {
       proveedor_cedula_ruc: "",
-      numero_factura: "",
+      numero_factura_proveedor: "",
       fecha_emision: new Date(),
       fecha_vencimiento: null,
+      tipo_pago: "Contado",
       estado: "Registrada",
     },
   });
@@ -58,9 +59,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       } else {
         form.reset({
           proveedor_cedula_ruc: "",
-          numero_factura: "",
+          numero_factura_proveedor: "",
           fecha_emision: new Date(),
           fecha_vencimiento: null,
+          tipo_pago: "Contado",
           estado: "Registrada",
         });
       }
@@ -129,10 +131,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
             />
             <FormField
               control={form.control}
-              name="numero_factura"
+              name="numero_factura_proveedor"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Número de Factura</FormLabel>
+                  <FormLabel>Número de Factura Proveedor</FormLabel>
                   <FormControl>
                     <Input placeholder="001-001-000000123" {...field} />
                   </FormControl>
@@ -211,29 +213,51 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                   )}
                 />
              </div>
-             <FormField
-                control={form.control}
-                name="estado"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione un estado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Registrada">Registrada</SelectItem>
-                        <SelectItem value="Pendiente">Pendiente</SelectItem>
-                        <SelectItem value="Pagada">Pagada</SelectItem>
-                        <SelectItem value="Anulada">Anulada</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+             <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="tipo_pago"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Tipo de Pago</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder="Seleccione un tipo" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="Contado">Contado</SelectItem>
+                            <SelectItem value="Crédito">Crédito</SelectItem>
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="estado"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder="Seleccione un estado" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="Registrada">Registrada</SelectItem>
+                            <SelectItem value="Impresa">Impresa</SelectItem>
+                            <SelectItem value="Cancelada">Cancelada</SelectItem>
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={isPending}>{isPending ? "Guardando..." : "Guardar Cambios"}</Button>

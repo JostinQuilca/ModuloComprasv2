@@ -29,8 +29,8 @@ interface DetallesFacturaClientProps {
     productos: Producto[];
 }
 
-const formatUTCDate = (dateString: string) => {
-    if (!dateString) return '';
+const formatUTCDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
     try {
         const date = parseISO(dateString);
         const userTimezoneOffset = date.getTimezoneOffset() * 60000;
@@ -43,11 +43,9 @@ const formatUTCDate = (dateString: string) => {
 
 const getBadgeVariant = (estado: FacturaCompra['estado']) => {
     switch (estado) {
-        case 'Pagada': return 'default';
-        case 'Pendiente':
-        case 'Registrada':
-            return 'secondary';
-        case 'Anulada': return 'destructive';
+        case 'Impresa': return 'default';
+        case 'Registrada': return 'secondary';
+        case 'Cancelada': return 'destructive';
         default: return 'outline';
     }
 };
@@ -112,8 +110,8 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                     </CardHeader>
                     <CardContent className="grid gap-2 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground"># Factura:</span>
-                            <span>{factura.numero_factura}</span>
+                            <span className="text-muted-foreground"># Factura Proveedor:</span>
+                            <span>{factura.numero_factura_proveedor}</span>
                         </div>
                          <div className="flex justify-between">
                             <span className="text-muted-foreground">Proveedor:</span>
@@ -126,6 +124,10 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                          <div className="flex justify-between">
                             <span className="text-muted-foreground">F. Vencimiento:</span>
                             <span>{formatUTCDate(factura.fecha_vencimiento)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Tipo de Pago:</span>
+                            <span>{factura.tipo_pago}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Estado:</span>

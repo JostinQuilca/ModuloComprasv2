@@ -39,28 +39,34 @@ export const ProductoSchema = z.object({
 
 export type Producto = z.infer<typeof ProductoSchema>;
 
+// Schema updated according to the new database structure
 export const FacturaCompraSchema = z.object({
   id: z.number().optional(),
   proveedor_cedula_ruc: z.string().min(1, "El proveedor es requerido."),
-  numero_factura: z.string().min(1, "El número de factura es requerido."),
+  numero_factura: z.string().optional(),
+  numero_factura_proveedor: z.string().min(1, "El número de factura del proveedor es requerido."),
   fecha_emision: z.date({ required_error: "La fecha de emisión es requerida."}),
   fecha_vencimiento: z.date({ invalid_type_error: "Fecha de vencimiento inválida." }).nullable(),
+  tipo_pago: z.enum(["Contado", "Crédito"], { required_error: "El tipo de pago es requerido."}),
   subtotal: z.number().optional().default(0),
   iva: z.number().optional().default(0),
   total: z.number().optional().default(0),
-  estado: z.enum(["Pendiente", "Pagada", "Anulada", "Registrada"]),
+  estado: z.enum(["Registrada", "Impresa", "Cancelada"]),
 });
 
 export type FacturaCompra = {
   id: number;
   proveedor_cedula_ruc: string;
   numero_factura: string;
+  numero_factura_proveedor: string;
   fecha_emision: string;
   fecha_vencimiento: string | null;
+  tipo_pago: 'Contado' | 'Crédito';
   subtotal: number;
   iva: number;
   total: number;
-  estado: 'Pendiente' | 'Pagada' | 'Anulada' | 'Registrada';
+  // Allow multiple states to be compatible with potential API responses during transition
+  estado: 'Registrada' | 'Impresa' | 'Cancelada' | 'Pendiente' | 'Pagada' | 'Anulada';
   fecha_creacion?: string;
   usuario_creacion?: number;
 };

@@ -28,10 +28,11 @@ export async function addFactura(
   const fechaVencimientoValue = formData.get('fecha_vencimiento');
   const rawData = {
       proveedor_cedula_ruc: formData.get('proveedor_cedula_ruc'),
-      numero_factura: formData.get('numero_factura'),
+      numero_factura_proveedor: formData.get('numero_factura_proveedor'),
       fecha_emision: new Date(formData.get('fecha_emision') as string),
       fecha_vencimiento: fechaVencimientoValue ? new Date(fechaVencimientoValue as string) : null,
       estado: formData.get('estado'),
+      tipo_pago: formData.get('tipo_pago'),
   };
   
   const validatedFields = FacturaCompraSchema.safeParse(rawData);
@@ -88,10 +89,11 @@ export async function updateFactura(
     const fechaVencimientoValue = formData.get('fecha_vencimiento');
     const rawData = {
       proveedor_cedula_ruc: formData.get('proveedor_cedula_ruc'),
-      numero_factura: formData.get('numero_factura'),
+      numero_factura_proveedor: formData.get('numero_factura_proveedor'),
       fecha_emision: new Date(formData.get('fecha_emision') as string),
       fecha_vencimiento: fechaVencimientoValue ? new Date(fechaVencimientoValue as string) : null,
       estado: formData.get('estado'),
+      tipo_pago: formData.get('tipo_pago'),
     };
 
   const validatedFields = FacturaCompraSchema.safeParse(rawData);

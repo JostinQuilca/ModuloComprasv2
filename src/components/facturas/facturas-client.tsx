@@ -32,8 +32,8 @@ import { format, parseISO } from "date-fns";
 type FacturaConNombre = FacturaCompra & { nombre_proveedor: string };
 type SortKey = keyof FacturaConNombre | 'id';
 
-const formatUTCDate = (dateString: string) => {
-    if (!dateString) return '';
+const formatUTCDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
     try {
         const date = parseISO(dateString);
         // Adjust for timezone offset to prevent hydration errors
@@ -47,22 +47,27 @@ const formatUTCDate = (dateString: string) => {
 
 const getBadgeVariant = (estado: FacturaCompra['estado']) => {
     switch (estado) {
-        case 'Pagada': return 'default';
-        case 'Pendiente':
-        case 'Registrada':
-            return 'secondary';
-        case 'Anulada': return 'destructive';
+        case 'Impresa': return 'default';
+        case 'Registrada': return 'secondary';
+        case 'Cancelada': return 'destructive';
+        case 'Pagada': return 'default'; // Keep for backwards compatibility if API sends it
+        case 'Pendiente': return 'secondary'; // Keep for backwards compatibility
+        case 'Anulada': return 'destructive'; // Keep for backwards compatibility
         default: return 'outline';
     }
 };
 
 const getBadgeClassName = (estado: FacturaCompra['estado']) => {
     switch (estado) {
+        case 'Impresa': return 'bg-blue-100 text-blue-800';
+        case 'Registrada': return 'bg-yellow-100 text-yellow-800';
+        case 'Cancelada': return 'bg-red-100 text-red-800';
+        
+        // Backwards compatibility styles
         case 'Pagada': return 'bg-green-100 text-green-800';
-        case 'Pendiente': 
-        case 'Registrada':
-            return 'bg-yellow-100 text-yellow-800';
+        case 'Pendiente': return 'bg-yellow-100 text-yellow-800';
         case 'Anulada': return 'bg-red-100 text-red-800';
+        
         default: return 'bg-gray-100 text-gray-800';
     }
 };
@@ -114,7 +119,7 @@ export default function FacturasClient({ initialData, proveedores }: { initialDa
     sortedData.filter(
       (item) =>
         item.nombre_proveedor.toLowerCase().includes(filter.toLowerCase()) ||
-        item.numero_factura.toLowerCase().includes(filter.toLowerCase()) ||
+        item.numero_factura_proveedor.toLowerCase().includes(filter.toLowerCase()) ||
         item.estado.toLowerCase().includes(filter.toLowerCase())
     ),
     [sortedData, filter]
@@ -190,8 +195,8 @@ export default function FacturasClient({ initialData, proveedores }: { initialDa
             <TableHeader>
               <TableRow>
                 <TableHead>Acciones</TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("numero_factura")}>
-                  <span className="flex items-center gap-2"># Factura <ArrowUpDown className="h-4 w-4" /></span>
+                <TableHead className="cursor-pointer" onClick={() => handleSort("numero_factura_proveedor")}>
+                  <span className="flex items-center gap-2"># Factura Proveedor <ArrowUpDown className="h-4 w-4" /></span>
                 </TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("nombre_proveedor")}>
                    <span className="flex items-center gap-2">Proveedor <ArrowUpDown className="h-4 w-4" /></span>
@@ -221,7 +226,7 @@ export default function FacturasClient({ initialData, proveedores }: { initialDa
                         <Trash2 className="h-5 w-5 text-destructive" />
                       </Button>
                     </TableCell>
-                    <TableCell className="font-medium">{item.numero_factura}</TableCell>
+                    <TableCell className="font-medium">{item.numero_factura_proveedor}</TableCell>
                     <TableCell>{item.nombre_proveedor}</TableCell>
                     <TableCell>{formatUTCDate(item.fecha_emision)}</TableCell>
                     <TableCell>{formatUTCDate(item.fecha_vencimiento)}</TableCell>
@@ -278,7 +283,7 @@ export default function FacturasClient({ initialData, proveedores }: { initialDa
         isOpen={isDeleteDialogOpen}
         setIsOpen={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
-        facturaNumero={deletingFactura?.numero_factura}
+        facturaNumero={deletingFactura?.numero_factura_proveedor}
       />
     </>
   );
