@@ -60,7 +60,7 @@ export type FacturaCompra = {
   subtotal: number;
   iva: number;
   total: number;
-  estado: 'Pendiente' | 'Pagada' | 'Anulada';
+  estado: 'Pendiente' | 'Pagada' | 'Anulada' | 'Registrada';
   fecha_creacion?: string;
   usuario_creacion?: number;
 };

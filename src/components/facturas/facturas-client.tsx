@@ -45,6 +45,29 @@ const formatUTCDate = (dateString: string) => {
     }
 };
 
+const getBadgeVariant = (estado: FacturaCompra['estado']) => {
+    switch (estado) {
+        case 'Pagada': return 'default';
+        case 'Pendiente':
+        case 'Registrada':
+            return 'secondary';
+        case 'Anulada': return 'destructive';
+        default: return 'outline';
+    }
+};
+
+const getBadgeClassName = (estado: FacturaCompra['estado']) => {
+    switch (estado) {
+        case 'Pagada': return 'bg-green-100 text-green-800';
+        case 'Pendiente': 
+        case 'Registrada':
+            return 'bg-yellow-100 text-yellow-800';
+        case 'Anulada': return 'bg-red-100 text-red-800';
+        default: return 'bg-gray-100 text-gray-800';
+    }
+};
+
+
 export default function FacturasClient({ initialData, proveedores }: { initialData: FacturaConNombre[], proveedores: Proveedor[] }) {
   const [data, setData] = React.useState<FacturaConNombre[]>(initialData);
   const [filter, setFilter] = React.useState("");
@@ -204,8 +227,8 @@ export default function FacturasClient({ initialData, proveedores }: { initialDa
                     <TableCell>{formatUTCDate(item.fecha_vencimiento)}</TableCell>
                     <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
                     <TableCell>
-                      <Badge variant={item.estado === 'Pagada' ? 'default' : item.estado === 'Pendiente' ? 'secondary' : 'destructive'} 
-                             className={item.estado === 'Pagada' ? 'bg-green-100 text-green-800' : item.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}>
+                      <Badge variant={getBadgeVariant(item.estado)} 
+                             className={getBadgeClassName(item.estado)}>
                         {item.estado}
                       </Badge>
                     </TableCell>

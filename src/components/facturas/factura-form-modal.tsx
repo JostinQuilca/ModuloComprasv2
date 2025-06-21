@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { format, parseISO } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import { useRouter } from 'next/navigation';
 
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -33,6 +34,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
   const isEditMode = !!factura;
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm<FacturaFormData>({
     resolver: zodResolver(FacturaCompraSchema),
@@ -71,11 +73,14 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       if (state.success) {
         toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: state.message });
         setIsOpen(false);
+        if (state.redirectUrl) {
+            router.push(state.redirectUrl);
+        }
       } else {
         toast({ title: "Error", description: state.message, variant: "destructive" });
       }
     }
-  }, [state, isPending, toast, isEditMode, setIsOpen]);
+  }, [state, isPending, toast, isEditMode, setIsOpen, router]);
 
   const onSubmit = (data: FacturaFormData) => {
     const formData = new FormData();

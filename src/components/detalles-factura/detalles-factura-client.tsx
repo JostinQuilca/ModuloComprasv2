@@ -41,6 +41,17 @@ const formatUTCDate = (dateString: string) => {
     }
 };
 
+const getBadgeVariant = (estado: FacturaCompra['estado']) => {
+    switch (estado) {
+        case 'Pagada': return 'default';
+        case 'Pendiente':
+        case 'Registrada':
+            return 'secondary';
+        case 'Anulada': return 'destructive';
+        default: return 'outline';
+    }
+};
+
 export default function DetallesFacturaClient({ factura, initialDetalles, productos }: DetallesFacturaClientProps) {
     const [detalles, setDetalles] = React.useState(initialDetalles);
     const [isModalOpen, setModalOpen] = React.useState(false);
@@ -118,7 +129,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Estado:</span>
-                            <Badge variant={factura.estado === 'Pagada' ? 'default' : factura.estado === 'Pendiente' ? 'secondary' : 'destructive'}>{factura.estado}</Badge>
+                            <Badge variant={getBadgeVariant(factura.estado)}>{factura.estado}</Badge>
                         </div>
                     </CardContent>
                 </Card>

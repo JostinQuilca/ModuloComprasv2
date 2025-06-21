@@ -10,6 +10,7 @@ const API_URL = "https://modulocompras-production-843f.up.railway.app/api/factur
 type ActionResponse = {
   success: boolean;
   message: string;
+  redirectUrl?: string;
 };
 
 function formatZodErrors(error: z.ZodError): string {
@@ -62,9 +63,15 @@ export async function addFactura(
        const errorData = await response.json();
        throw new Error(errorData.message || 'Error al crear la factura.');
     }
+    
+    const newFactura = await response.json();
 
     revalidatePath("/facturas");
-    return { success: true, message: "Factura añadida con éxito." };
+    return { 
+        success: true, 
+        message: "Factura creada con éxito. Redirigiendo...",
+        redirectUrl: `/detalles-factura?factura_id=${newFactura.id}`
+    };
   } catch (error: unknown) {
     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
   }
