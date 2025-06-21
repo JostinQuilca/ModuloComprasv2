@@ -4,6 +4,7 @@ import { useEffect, useActionState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
+import { useRouter } from 'next/navigation';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -30,6 +31,7 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
   const isEditMode = !!detalle;
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm<DetalleFormData>({
     resolver: zodResolver(FacturaDetalleSchema),
@@ -79,11 +81,12 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
       if (state.success) {
         toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: state.message });
         setIsOpen(false);
+        router.refresh();
       } else {
         toast({ title: "Error", description: state.message, variant: "destructive" });
       }
     }
-  }, [state, isPending, toast, isEditMode, setIsOpen]);
+  }, [state, isPending, toast, isEditMode, setIsOpen, router]);
 
   const onSubmit = (data: DetalleFormData) => {
     const formData = new FormData();

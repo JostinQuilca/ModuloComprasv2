@@ -77,9 +77,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       if (state.success) {
         toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: state.message });
         setIsOpen(false);
-        if (state.redirectUrl) {
-            router.push(state.redirectUrl);
-        }
+        router.refresh();
       } else {
         toast({ title: "Error", description: state.message, variant: "destructive" });
       }

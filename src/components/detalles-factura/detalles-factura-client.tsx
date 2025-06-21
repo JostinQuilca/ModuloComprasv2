@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -66,6 +67,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
     const [isDeleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
     const [deletingDetalle, setDeletingDetalle] = React.useState<FacturaDetalle | null>(null);
     const { toast } = useToast();
+    const router = useRouter();
 
     React.useEffect(() => {
         setDetalles(initialDetalles);
@@ -92,6 +94,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
         const result = await deleteDetalle(deletingDetalle.id, deletingDetalle.factura_id);
         if (result.success) {
             toast({ title: "Éxito", description: result.message });
+            router.refresh();
         } else {
             toast({ title: "Error", description: result.message, variant: "destructive" });
         }
