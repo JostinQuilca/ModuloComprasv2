@@ -1,58 +1,6 @@
 
 import FacturasClient from '@/components/facturas/facturas-client';
-import type { FacturaCompra, Proveedor, Producto } from '@/lib/types';
-
-async function getFacturas(): Promise<FacturaCompra[]> {
-  try {
-    const res = await fetch('https://modulocompras-production-843f.up.railway.app/api/facturas', {
-      cache: 'no-store',
-    });
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Failed to fetch facturas: ${res.status} ${res.statusText} - ${errorText}`);
-    }
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
-
-async function getProveedores(): Promise<Proveedor[]> {
-  try {
-    const res = await fetch('https://modulocompras-production-843f.up.railway.app/api/proveedores', {
-      cache: 'no-store',
-    });
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Failed to fetch proveedores: ${res.status} ${res.statusText} - ${errorText}`);
-    }
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
-
-async function getProductos(): Promise<Producto[]> {
-    try {
-        const res = await fetch('https://adapi-production-16e6.up.railway.app/api/v1/productos/', {
-            cache: 'no-store',
-        });
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`Failed to fetch productos: ${res.status} ${res.statusText} - ${errorText}`);
-        }
-        const responseData = await res.json();
-        return Array.isArray(responseData) ? responseData : (responseData && Array.isArray(responseData.data)) ? responseData.data : [];
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
-}
-
+import { getFacturas, getProveedores, getProductos } from '@/lib/data';
 
 export default async function FacturasPage() {
   const [facturas, proveedores, productos] = await Promise.all([

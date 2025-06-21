@@ -1,22 +1,5 @@
 import ProveedoresClient from '@/components/proveedores/proveedores-client';
-import { Proveedor } from '@/lib/types';
-
-async function getProveedores(): Promise<Proveedor[]> {
-  try {
-    const res = await fetch('https://modulocompras-production-843f.up.railway.app/api/proveedores', {
-      cache: 'no-store', // Ensure fresh data on each request
-    });
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Failed to fetch proveedores: ${res.status} ${res.statusText} - ${errorText}`);
-    }
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
+import { getProveedores } from '@/lib/data';
 
 export default async function ProveedoresPage() {
   const proveedores = await getProveedores();

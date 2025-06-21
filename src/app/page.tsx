@@ -2,30 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Users, FileText, DollarSign, Activity } from 'lucide-react';
-import { Proveedor } from "@/lib/types";
+import { getProveedores } from "@/lib/data";
 import DashboardChart from '@/components/dashboard/dashboard-chart';
-
-async function getProveedores(): Promise<Proveedor[]> {
-  try {
-    const res = await fetch('https://modulocompras-production-843f.up.railway.app/api/proveedores', {
-      cache: 'no-store',
-    });
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Failed to fetch proveedores: ${res.status} ${res.statusText} - ${errorText}`);
-    }
-    const data = await res.json();
-    if (!Array.isArray(data)) {
-        console.error("API response for proveedores is not an array:", data);
-        return [];
-    }
-    // Ensure fecha_creacion is a string for sorting
-    return data.map((p: Proveedor) => ({...p, fecha_creacion: p.fecha_creacion || new Date(0).toISOString()}));
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
 
 export default async function DashboardPage() {
   const proveedores = await getProveedores();
