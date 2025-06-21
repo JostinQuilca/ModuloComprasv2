@@ -1,5 +1,5 @@
 import FacturasClient from '@/components/facturas/facturas-client';
-import type { FacturaCompra, Proveedor } from '@/lib/types';
+import type { FacturaCompra, Proveedor, Producto } from '@/lib/types';
 
 async function getFacturas(): Promise<FacturaCompra[]> {
   try {
@@ -32,14 +32,30 @@ async function getProveedores(): Promise<Proveedor[]> {
   }
 }
 
-export default async function FacturasPage() {
-  const facturas = await getFacturas();
-  const proveedores = await getProveedores();
+async function getProductos(): Promise<Producto[]> {
+    try {
+        const res = await fetch('https://adapi-production-16e6.up.railway.app/api/v1/productos/', {
+            cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('No se pudieron cargar los productos');
+        const responseData = await res.json();
+        return Array.isArray(responseData) ? responseData : responseData.data || [];
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
 
-  // Create a map for quick lookup
+
+export default async function FacturasPage() {
+  const [facturas, proveedores, productos] = await Promise.all([
+      getFacturas(),
+      getProveedores(),
+      getProductos(),
+  ]);
+
   const proveedorMap = new Map(proveedores.map(p => [p.cedula_ruc, p.nombre]));
 
-  // Add provider name to each invoice
   const facturasConNombreProveedor = facturas.map(factura => ({
     ...factura,
     nombre_proveedor: proveedorMap.get(factura.proveedor_cedula_ruc) || 'Desconocido',
@@ -53,6 +69,7 @@ export default async function FacturasPage() {
       <FacturasClient 
         initialData={facturasConNombreProveedor} 
         proveedores={proveedores} 
+        productos={productos}
       />
     </main>
   );

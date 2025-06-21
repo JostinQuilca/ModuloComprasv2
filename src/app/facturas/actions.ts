@@ -2,14 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { FacturaCompraSchema } from "@/lib/types";
+import { FacturaCompra, FacturaCompraSchema } from "@/lib/types";
 import { format } from 'date-fns';
 
 const API_URL = "https://modulocompras-production-843f.up.railway.app/api/facturas";
 
-type ActionResponse = {
+export type ActionResponse = {
   success: boolean;
   message: string;
+  factura?: FacturaCompra;
 };
 
 function formatZodErrors(error: z.ZodError): string {
@@ -62,8 +63,6 @@ export async function addFactura(
   
   const dataToSubmit = {
       ...validatedFields.data,
-      // The backend requires a non-null value for numero_factura.
-      // We send a temporary unique value to prevent a database error.
       numero_factura: `TEMP-${Date.now()}`,
       fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
       fecha_vencimiento: validatedFields.data.fecha_vencimiento 
@@ -72,7 +71,7 @@ export async function addFactura(
       subtotal: 0,
       iva: 0,
       total: 0,
-      usuario_creacion: 1, // Mock user ID
+      usuario_creacion: 1, 
   };
 
   try {
@@ -86,12 +85,13 @@ export async function addFactura(
        await handleApiError(response, 'Error al crear la factura.');
     }
     
-    await response.json();
+    const newFactura = await response.json();
 
     revalidatePath("/facturas");
     return { 
         success: true, 
         message: "Factura creada con éxito.",
+        factura: newFactura,
     };
   } catch (error: unknown) {
     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
@@ -128,7 +128,7 @@ export async function updateFactura(
       fecha_vencimiento: validatedFields.data.fecha_vencimiento
         ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
         : null,
-      usuario_modificacion: 1, // Mock user ID
+      usuario_modificacion: 1,
   };
   
   try {
@@ -142,11 +142,14 @@ export async function updateFactura(
       await handleApiError(response, 'Error al actualizar la factura.');
     }
     
+    const updatedFactura = await response.json();
+    
     revalidatePath("/facturas");
     revalidatePath(`/detalles-factura?factura_id=${id}`);
     return { 
         success: true, 
         message: "Factura actualizada con éxito.",
+        factura: updatedFactura,
     };
   } catch (error: unknown) {
      return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };

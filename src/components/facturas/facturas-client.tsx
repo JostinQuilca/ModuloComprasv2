@@ -21,7 +21,7 @@ import {
   Trash2,
   Eye,
 } from "lucide-react";
-import type { FacturaCompra, Proveedor } from "@/lib/types";
+import type { FacturaCompra, Proveedor, Producto } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import FacturaFormModal from "./factura-form-modal";
 import DeleteFacturaDialog from "./delete-factura-dialog";
@@ -36,7 +36,6 @@ const formatUTCDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
     try {
         const date = parseISO(dateString);
-        // Adjust for timezone offset to prevent hydration errors
         const userTimezoneOffset = date.getTimezoneOffset() * 60000;
         return format(new Date(date.getTime() + userTimezoneOffset), 'dd/MM/yyyy');
     } catch (error) {
@@ -50,9 +49,9 @@ const getBadgeVariant = (estado: FacturaCompra['estado']) => {
         case 'Impresa': return 'default';
         case 'Registrada': return 'secondary';
         case 'Cancelada': return 'destructive';
-        case 'Pagada': return 'default'; // Keep for backwards compatibility if API sends it
-        case 'Pendiente': return 'secondary'; // Keep for backwards compatibility
-        case 'Anulada': return 'destructive'; // Keep for backwards compatibility
+        case 'Pagada': return 'default';
+        case 'Pendiente': return 'secondary';
+        case 'Anulada': return 'destructive';
         default: return 'outline';
     }
 };
@@ -62,18 +61,15 @@ const getBadgeClassName = (estado: FacturaCompra['estado']) => {
         case 'Impresa': return 'bg-blue-100 text-blue-800';
         case 'Registrada': return 'bg-yellow-100 text-yellow-800';
         case 'Cancelada': return 'bg-red-100 text-red-800';
-        
-        // Backwards compatibility styles
         case 'Pagada': return 'bg-green-100 text-green-800';
         case 'Pendiente': return 'bg-yellow-100 text-yellow-800';
         case 'Anulada': return 'bg-red-100 text-red-800';
-        
         default: return 'bg-gray-100 text-gray-800';
     }
 };
 
 
-export default function FacturasClient({ initialData, proveedores }: { initialData: FacturaConNombre[], proveedores: Proveedor[] }) {
+export default function FacturasClient({ initialData, proveedores, productos }: { initialData: FacturaConNombre[], proveedores: Proveedor[], productos: Producto[] }) {
   const [data, setData] = React.useState<FacturaConNombre[]>(initialData);
   const [filter, setFilter] = React.useState("");
   const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: "asc" | "desc" } | null>(null);
@@ -277,6 +273,7 @@ export default function FacturasClient({ initialData, proveedores }: { initialDa
         setIsOpen={setModalOpen}
         factura={editingFactura}
         proveedores={proveedores}
+        productos={productos}
       />
       
       <DeleteFacturaDialog
