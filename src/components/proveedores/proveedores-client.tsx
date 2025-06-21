@@ -146,6 +146,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Acciones</TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("cedula_ruc")}>
                   <span className="flex items-center gap-2">Cédula/RUC <ArrowUpDown className="h-4 w-4" /></span>
                 </TableHead>
@@ -159,13 +160,20 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
                 <TableHead className="cursor-pointer" onClick={() => handleSort("estado")}>
                   <span className="flex items-center gap-2">Estado <ArrowUpDown className="h-4 w-4" /></span>
                 </TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length > 0 ? (
                 paginatedData.map((item) => (
                   <TableRow key={item.cedula_ruc}>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(item)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(item)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
                     <TableCell className="font-medium">{item.cedula_ruc}</TableCell>
                     <TableCell>{item.nombre}</TableCell>
                     <TableCell>{item.email}</TableCell>
@@ -176,14 +184,6 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
                       <Badge variant={item.estado ? "default" : "secondary"} className={item.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
                         {item.estado ? "Activo" : "Inactivo"}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(item)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(item)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
