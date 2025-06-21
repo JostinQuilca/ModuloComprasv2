@@ -21,6 +21,17 @@ function formatZodErrors(error: z.ZodError): string {
     return `Datos de formulario no válidos: ${errorMessages}`;
 }
 
+async function handleApiError(response: Response, defaultMessage: string): Promise<never> {
+    let errorMessage = defaultMessage;
+    try {
+        const errorBody = await response.json();
+        errorMessage = errorBody.message || JSON.stringify(errorBody);
+    } catch {
+        // Ignore if the body is not JSON, the default message will be used.
+    }
+    throw new Error(errorMessage);
+}
+
 export async function addFactura(
   prevState: any,
   formData: FormData
@@ -64,8 +75,7 @@ export async function addFactura(
     });
 
     if (!response.ok) {
-       const errorData = await response.json();
-       throw new Error(errorData.message || 'Error al crear la factura.');
+       await handleApiError(response, 'Error al crear la factura.');
     }
     
     const newFactura = await response.json();
@@ -122,8 +132,7 @@ export async function updateFactura(
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al actualizar la factura.');
+      await handleApiError(response, 'Error al actualizar la factura.');
     }
     
     revalidatePath("/facturas");
@@ -141,8 +150,7 @@ export async function deleteFactura(id: number): Promise<ActionResponse> {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al eliminar la factura.');
+      await handleApiError(response, 'Error al eliminar la factura.');
     }
 
     revalidatePath("/facturas");

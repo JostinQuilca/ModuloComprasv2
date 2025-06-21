@@ -19,6 +19,18 @@ function formatZodErrors(error: z.ZodError): string {
     return `Datos de formulario no válidos: ${errorMessages}`;
 }
 
+async function handleApiError(response: Response, defaultMessage: string): Promise<never> {
+    let errorMessage = defaultMessage;
+    try {
+        const errorBody = await response.json();
+        errorMessage = errorBody.message || JSON.stringify(errorBody);
+    } catch {
+        // Ignore if the body is not JSON, the default message will be used.
+    }
+    throw new Error(errorMessage);
+}
+
+
 export async function addDetalle(
   prevState: any,
   formData: FormData
@@ -52,8 +64,7 @@ export async function addDetalle(
     });
 
     if (!response.ok) {
-       const errorData = await response.json();
-       throw new Error(errorData.message || 'Error al crear el detalle.');
+       await handleApiError(response, 'Error al crear el detalle.');
     }
 
     revalidatePath(`/detalles-factura?factura_id=${dataToSubmit.factura_id}`);
@@ -98,8 +109,7 @@ export async function updateDetalle(
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al actualizar el detalle.');
+      await handleApiError(response, 'Error al actualizar el detalle.');
     }
     
     revalidatePath(`/detalles-factura?factura_id=${dataToSubmit.factura_id}`);
@@ -117,8 +127,7 @@ export async function deleteDetalle(id: number, factura_id: number): Promise<Act
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al eliminar el detalle.');
+      await handleApiError(response, 'Error al eliminar el detalle.');
     }
 
     revalidatePath(`/detalles-factura?factura_id=${factura_id}`);

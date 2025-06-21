@@ -19,6 +19,17 @@ function formatZodErrors(error: z.ZodError): string {
     return `Datos de formulario no válidos: ${errorMessages}`;
 }
 
+async function handleApiError(response: Response, defaultMessage: string): Promise<never> {
+    let errorMessage = defaultMessage;
+    try {
+        const errorBody = await response.json();
+        errorMessage = errorBody.message || JSON.stringify(errorBody);
+    } catch {
+        // Ignore if the body is not JSON, the default message will be used.
+    }
+    throw new Error(errorMessage);
+}
+
 export async function addProveedor(
   prevState: any,
   formData: FormData
@@ -51,8 +62,7 @@ export async function addProveedor(
     });
 
     if (!response.ok) {
-       const errorData = await response.json();
-       throw new Error(errorData.message || 'Error al crear el proveedor.');
+       await handleApiError(response, 'Error al crear el proveedor.');
     }
 
     revalidatePath("/");
@@ -96,8 +106,7 @@ export async function updateProveedor(
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al actualizar el proveedor.');
+      await handleApiError(response, 'Error al actualizar el proveedor.');
     }
     
     revalidatePath("/");
@@ -115,8 +124,7 @@ export async function deleteProveedor(cedula_ruc: string): Promise<ActionRespons
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al eliminar el proveedor.');
+      await handleApiError(response, 'Error al eliminar el proveedor.');
     }
 
     revalidatePath("/");
