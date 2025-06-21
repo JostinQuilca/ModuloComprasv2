@@ -27,10 +27,23 @@ import FacturaFormModal from "./factura-form-modal";
 import DeleteFacturaDialog from "./delete-factura-dialog";
 import { deleteFactura } from "@/app/facturas/actions";
 import { Card } from "../ui/card";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 type FacturaConNombre = FacturaCompra & { nombre_proveedor: string };
 type SortKey = keyof FacturaConNombre | 'id';
+
+const formatUTCDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+        const date = parseISO(dateString);
+        // Adjust for timezone offset to prevent hydration errors
+        const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+        return format(new Date(date.getTime() + userTimezoneOffset), 'dd/MM/yyyy');
+    } catch (error) {
+        console.error("Invalid date string:", dateString, error);
+        return 'Fecha inválida';
+    }
+};
 
 export default function FacturasClient({ initialData, proveedores }: { initialData: FacturaConNombre[], proveedores: Proveedor[] }) {
   const [data, setData] = React.useState<FacturaConNombre[]>(initialData);
@@ -187,8 +200,8 @@ export default function FacturasClient({ initialData, proveedores }: { initialDa
                     </TableCell>
                     <TableCell className="font-medium">{item.numero_factura}</TableCell>
                     <TableCell>{item.nombre_proveedor}</TableCell>
-                    <TableCell>{format(new Date(item.fecha_emision), 'dd/MM/yyyy')}</TableCell>
-                    <TableCell>{format(new Date(item.fecha_vencimiento), 'dd/MM/yyyy')}</TableCell>
+                    <TableCell>{formatUTCDate(item.fecha_emision)}</TableCell>
+                    <TableCell>{formatUTCDate(item.fecha_vencimiento)}</TableCell>
                     <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant={item.estado === 'Pagada' ? 'default' : item.estado === 'Pendiente' ? 'secondary' : 'destructive'} 

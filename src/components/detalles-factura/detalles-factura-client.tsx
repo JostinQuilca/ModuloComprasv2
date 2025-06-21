@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from 'next/link';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
   Table,
@@ -28,6 +28,18 @@ interface DetallesFacturaClientProps {
     initialDetalles: FacturaDetalle[];
     productos: Producto[];
 }
+
+const formatUTCDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+        const date = parseISO(dateString);
+        const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+        return format(new Date(date.getTime() + userTimezoneOffset), "dd MMM, yyyy", { locale: es });
+    } catch (error) {
+        console.error("Invalid date string:", dateString, error);
+        return 'Fecha inválida';
+    }
+};
 
 export default function DetallesFacturaClient({ factura, initialDetalles, productos }: DetallesFacturaClientProps) {
     const [detalles, setDetalles] = React.useState(initialDetalles);
@@ -98,11 +110,11 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">F. Emisión:</span>
-                            <span>{format(new Date(factura.fecha_emision), "dd MMM, yyyy", { locale: es })}</span>
+                            <span>{formatUTCDate(factura.fecha_emision)}</span>
                         </div>
                          <div className="flex justify-between">
                             <span className="text-muted-foreground">F. Vencimiento:</span>
-                            <span>{format(new Date(factura.fecha_vencimiento), "dd MMM, yyyy", { locale: es })}</span>
+                            <span>{formatUTCDate(factura.fecha_vencimiento)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Estado:</span>
