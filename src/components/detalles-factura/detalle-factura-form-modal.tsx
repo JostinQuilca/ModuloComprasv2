@@ -9,12 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import type { FacturaDetalle, Producto } from "@/lib/types";
 import { FacturaDetalleSchema } from "@/lib/types";
 import { addDetalle, updateDetalle } from "@/app/detalles-factura/actions";
+import { Combobox } from "../ui/combobox";
 
 interface DetalleFacturaFormModalProps {
   isOpen: boolean;
@@ -96,6 +96,11 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
     });
     startTransition(() => formAction(formData));
   };
+  
+  const productOptions = productos.map(p => ({
+    value: String(p.id_producto),
+    label: `[${p.codigo}] ${p.nombre}`
+  }));
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -112,18 +117,19 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
               control={form.control}
               name="producto_id"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Producto</FormLabel>
-                   <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)} disabled={isEditMode}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccione un producto" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {productos.map(p => <SelectItem key={p.id_producto} value={String(p.id_producto)}>{p.nombre}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                     <Combobox
+                        options={productOptions}
+                        value={field.value ? String(field.value) : undefined}
+                        onChange={(value) => field.onChange(Number(value))}
+                        placeholder="Seleccione un producto"
+                        searchPlaceholder="Buscar producto por nombre o código..."
+                        emptyPlaceholder="No se encontró ningún producto."
+                        disabled={isEditMode}
+                      />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
