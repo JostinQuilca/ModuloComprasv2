@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useActionState, useTransition, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { format, parseISO } from "date-fns";
@@ -18,7 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import type { FacturaCompra, Proveedor, Producto, FacturaDetalle } from "@/lib/types";
-import { FacturaCompraSchema, FacturaDetalleSchema } from "@/lib/types";
+import { FacturaCompraSchema } from "@/lib/types";
 import { addFactura, updateFactura, type ActionResponse as FacturaActionResponse } from "@/app/facturas/actions";
 import { addDetalle } from "@/app/detalles-factura/actions";
 import { Combobox } from "../ui/combobox";
@@ -66,6 +66,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       estado: "Registrada",
     },
   });
+  const { reset } = form;
 
   const productOptions = productos.map(p => ({
     value: String(p.id_producto),
@@ -74,16 +75,15 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
 
   useEffect(() => {
     if (isOpen) {
-      // Reset details when opening
       setDetalles([]);
       if (factura) {
-        form.reset({
+        reset({
           ...factura,
           fecha_emision: parseISO(factura.fecha_emision),
           fecha_vencimiento: factura.fecha_vencimiento ? parseISO(factura.fecha_vencimiento) : null,
         });
       } else {
-        form.reset({
+        reset({
           proveedor_cedula_ruc: "",
           numero_factura_proveedor: "",
           fecha_emision: new Date(),
@@ -93,7 +93,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         });
       }
     }
-  }, [factura, form, isOpen]);
+  }, [factura, isOpen, reset]);
 
   useEffect(() => {
     if (selectedProduct) {
@@ -152,7 +152,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       const headerFormData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value instanceof Date) {
-          headerFormData.append(key, value.toISOString());
+          headerFormData.append(key, format(value, "yyyy-MM-dd"));
         } else if (value !== null && value !== undefined) {
           headerFormData.append(key, String(value));
         }
@@ -163,10 +163,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         if (result.success) {
           toast({ title: "Actualización Exitosa", description: result.message });
           setIsOpen(false);
+          router.refresh();
         } else {
           toast({ title: "Error", description: result.message, variant: "destructive" });
         }
-        router.refresh();
         return;
       }
 
@@ -210,6 +210,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
               variant: "destructive",
               duration: 5000,
           });
+          router.push(`/detalles-factura?factura_id=${newFacturaId}`);
       } else {
           toast({ title: "Éxito", description: "Factura y detalles creados correctamente." });
       }
@@ -289,7 +290,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={field.value}
+                            selected={field.value as Date}
                             onSelect={field.onChange}
                             disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                             initialFocus
@@ -408,9 +409,9 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                        <Label>Precio Unit.</Label>
                        <Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} step="0.01" min="0"/>
                     </div>
-                    <div className="flex flex-col items-center justify-center">
-                        <Label>Aplica IVA</Label>
-                        <Switch checked={appliesIva} onCheckedChange={setAppliesIva} />
+                    <div className="flex flex-col items-center justify-center pt-6">
+                        <Label htmlFor="appliesIvaSwitch" className="mb-2">Aplica IVA</Label>
+                        <Switch id="appliesIvaSwitch" checked={appliesIva} onCheckedChange={setAppliesIva} />
                     </div>
                     <div>
                       <Button type="button" onClick={handleAddDetalle} className="w-full">
