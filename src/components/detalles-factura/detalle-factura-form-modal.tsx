@@ -94,6 +94,12 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
         formData.append(key, String(value));
       }
     });
+
+    // Find the product name and add it to the form data
+    const product = productos.find(p => p.id_producto === data.producto_id);
+    const nombre_producto = product ? product.nombre : (isEditMode && detalle ? detalle.nombre_producto : 'Desconocido');
+    formData.append('nombre_producto', nombre_producto);
+
     startTransition(() => formAction(formData));
   };
   

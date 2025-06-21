@@ -37,7 +37,12 @@ export async function addDetalle(
     return { success: false, message: formatZodErrors(validatedFields.error) };
   }
   
-  const dataToSubmit = { ...validatedFields.data, usuario_creacion: 1 };
+  const nombre_producto = formData.get('nombre_producto') as string | null;
+  if (!nombre_producto || nombre_producto === 'Desconocido') {
+      return { success: false, message: "No se pudo encontrar el nombre del producto." };
+  }
+
+  const dataToSubmit = { ...validatedFields.data, nombre_producto, usuario_creacion: 1 };
 
   try {
     const response = await fetch(API_URL, {
@@ -78,7 +83,12 @@ export async function updateDetalle(
      return { success: false, message: formatZodErrors(validatedFields.error) };
   }
 
-  const dataToSubmit = { ...validatedFields.data, usuario_modificacion: 1 };
+  const nombre_producto = formData.get('nombre_producto') as string | null;
+  if (!nombre_producto || nombre_producto === 'Desconocido') {
+      return { success: false, message: "No se pudo encontrar el nombre del producto." };
+  }
+  
+  const dataToSubmit = { ...validatedFields.data, nombre_producto, usuario_modificacion: 1 };
   
   try {
     const response = await fetch(`${API_URL}/${id}`, {
