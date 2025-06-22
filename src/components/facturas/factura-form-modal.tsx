@@ -165,6 +165,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       });
       
       if (isEditMode) {
+        headerFormData.append('subtotal', String(factura.subtotal));
+        headerFormData.append('iva', String(factura.iva));
+        headerFormData.append('total', String(factura.total));
+
         const result = await updateFactura(factura.id, null, headerFormData);
         if (result.success) {
           toast({ title: "Actualización Exitosa", description: result.message });
@@ -380,8 +384,11 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                             </FormControl>
                             <SelectContent>
                                 <SelectItem value="Registrada">Registrada</SelectItem>
+                                <SelectItem value="Pendiente">Pendiente</SelectItem>
+                                <SelectItem value="Pagada">Pagada</SelectItem>
                                 <SelectItem value="Impresa">Impresa</SelectItem>
                                 <SelectItem value="Cancelada">Cancelada</SelectItem>
+                                <SelectItem value="Anulada">Anulada</SelectItem>
                             </SelectContent>
                             </Select>
                             <FormMessage />

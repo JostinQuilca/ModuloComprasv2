@@ -51,7 +51,7 @@ export const FacturaCompraSchema = z.object({
   subtotal: z.number().optional().default(0),
   iva: z.number().optional().default(0),
   total: z.number().optional().default(0),
-  estado: z.enum(["Registrada", "Impresa", "Cancelada"]),
+  estado: z.enum(["Registrada", "Impresa", "Cancelada", "Pendiente", "Pagada", "Anulada"]),
 });
 
 export type FacturaCompra = {

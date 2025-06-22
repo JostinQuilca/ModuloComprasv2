@@ -111,6 +111,9 @@ export async function updateFactura(
       fecha_vencimiento: fechaVencimientoValue ? new Date(fechaVencimientoValue as string) : null,
       estado: formData.get('estado'),
       tipo_pago: formData.get('tipo_pago'),
+      subtotal: Number(formData.get('subtotal') ?? 0),
+      iva: Number(formData.get('iva') ?? 0),
+      total: Number(formData.get('total') ?? 0),
     };
 
   const validatedFields = FacturaCompraSchema.safeParse(rawData);
