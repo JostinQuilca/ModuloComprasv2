@@ -218,7 +218,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Factura" : "Añadir Nueva Factura"}</DialogTitle>
