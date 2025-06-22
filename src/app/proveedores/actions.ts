@@ -1,40 +1,11 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { ProveedorSchema } from "@/lib/types";
+import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
 
 const API_URL = "https://modulocompras-production-843f.up.railway.app/api/proveedores";
-
-type ActionResponse = {
-  success: boolean;
-  message: string;
-};
-
-function formatZodErrors(error: z.ZodError): string {
-    const { fieldErrors } = error.flatten();
-    const errorMessages = Object.entries(fieldErrors)
-        .map(([fieldName, errors]) => `${fieldName}: ${errors.join(', ')}`)
-        .join('; ');
-    return `Datos de formulario no válidos: ${errorMessages}`;
-}
-
-async function handleApiError(response: Response, defaultMessage: string): Promise<never> {
-    let errorMessage = defaultMessage;
-    try {
-        const errorBody = await response.json();
-        if (errorBody.error && typeof errorBody.error === 'string') {
-          errorMessage = errorBody.error;
-        } else if (errorBody.message) {
-          errorMessage = errorBody.message
-        } else {
-          errorMessage = JSON.stringify(errorBody);
-        }
-    } catch {
-        // Ignore if the body is not JSON, the default message will be used.
-    }
-    throw new Error(errorMessage);
-}
 
 export async function addProveedor(
   prevState: any,

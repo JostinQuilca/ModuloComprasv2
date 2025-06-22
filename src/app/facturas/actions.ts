@@ -1,47 +1,17 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { FacturaCompra, FacturaCompraSchema } from "@/lib/types";
 import { format } from 'date-fns';
+import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
 
 const API_URL = "https://modulocompras-production-843f.up.railway.app/api/facturas";
-
-export type ActionResponse = {
-  success: boolean;
-  message: string;
-  factura?: FacturaCompra;
-};
-
-function formatZodErrors(error: z.ZodError): string {
-    const { fieldErrors } = error.flatten();
-    const errorMessages = Object.entries(fieldErrors)
-        .map(([fieldName, errors]) => `${fieldName}: ${errors?.join(', ')}`)
-        .join('; ');
-    return `Datos de formulario no válidos: ${errorMessages}`;
-}
-
-async function handleApiError(response: Response, defaultMessage: string): Promise<never> {
-    let errorMessage = defaultMessage;
-    try {
-        const errorBody = await response.json();
-        if (errorBody.error && typeof errorBody.error === 'string') {
-          errorMessage = errorBody.error;
-        } else if (errorBody.message) {
-          errorMessage = errorBody.message
-        } else {
-          errorMessage = JSON.stringify(errorBody);
-        }
-    } catch {
-        // Ignore if the body is not JSON, the default message will be used.
-    }
-    throw new Error(errorMessage);
-}
 
 export async function addFactura(
   prevState: any,
   formData: FormData
-): Promise<ActionResponse> {
+): Promise<ActionResponse<FacturaCompra>> {
   const fechaVencimientoValue = formData.get('fecha_vencimiento');
   const rawData = {
       proveedor_cedula_ruc: formData.get('proveedor_cedula_ruc'),
@@ -91,7 +61,7 @@ export async function addFactura(
     return { 
         success: true, 
         message: "Factura creada con éxito.",
-        factura: newFactura,
+        data: newFactura,
     };
   } catch (error: unknown) {
     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
@@ -102,7 +72,7 @@ export async function updateFactura(
   id: number,
   prevState: any,
   formData: FormData
-): Promise<ActionResponse> {
+): Promise<ActionResponse<FacturaCompra>> {
     const fechaVencimientoValue = formData.get('fecha_vencimiento');
     const rawData = {
       proveedor_cedula_ruc: formData.get('proveedor_cedula_ruc'),
@@ -152,7 +122,7 @@ export async function updateFactura(
     return { 
         success: true, 
         message: "Factura actualizada con éxito.",
-        factura: updatedFactura,
+        data: updatedFactura,
     };
   } catch (error: unknown) {
      return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
