@@ -125,7 +125,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
     const nuevoDetalle: TempDetalle = {
       producto_id: product.id_producto,
       nombre_producto: product.nombre,
-      cantidad,
+      cantidad: quantity,
       precio_unitario: price,
       aplica_iva: appliesIva,
       subtotal,
