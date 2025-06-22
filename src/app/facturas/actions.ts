@@ -50,6 +50,9 @@ export async function addFactura(
       fecha_vencimiento: fechaVencimientoValue ? new Date(fechaVencimientoValue as string) : null,
       estado: formData.get('estado'),
       tipo_pago: formData.get('tipo_pago'),
+      subtotal: Number(formData.get('subtotal') ?? 0),
+      iva: Number(formData.get('iva') ?? 0),
+      total: Number(formData.get('total') ?? 0),
   };
   
   const validatedFields = FacturaCompraSchema.safeParse(rawData);
@@ -68,9 +71,6 @@ export async function addFactura(
       fecha_vencimiento: validatedFields.data.fecha_vencimiento 
         ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
         : null,
-      subtotal: 0,
-      iva: 0,
-      total: 0,
       usuario_creacion: 1, 
   };
 

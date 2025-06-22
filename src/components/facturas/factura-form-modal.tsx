@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useTransition, useState } from "react";
+import { useEffect, useTransition, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
@@ -53,6 +53,13 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [appliesIva, setAppliesIva] = useState(false);
+
+  const { totalSubtotal, totalIva, granTotal } = useMemo(() => {
+    const subtotal = detalles.reduce((acc, d) => acc + d.subtotal, 0);
+    const iva = detalles.reduce((acc, d) => acc + d.iva, 0);
+    const total = detalles.reduce((acc, d) => acc + d.total, 0);
+    return { totalSubtotal: subtotal, totalIva: iva, granTotal: total };
+  }, [detalles]);
 
   const form = useForm<FacturaFormData>({
     resolver: zodResolver(FacturaCompraSchema),
@@ -173,6 +180,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         toast({ title: "Error", description: "Debe añadir al menos un producto a la factura.", variant: "destructive"});
         return;
       }
+      
+      headerFormData.append('subtotal', String(totalSubtotal));
+      headerFormData.append('iva', String(totalIva));
+      headerFormData.append('total', String(granTotal));
       
       const headerResult: FacturaActionResponse = await addFactura(null, headerFormData);
 
@@ -385,75 +396,93 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
 
                     {/* Details Section */}
                     <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Detalles de la Factura</h3>
-                    {/* Add Detail Form */}
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end p-4 border rounded-lg">
-                        <div className="md:col-span-2">
-                        <Label>Producto</Label>
-                        <Combobox
-                            options={productOptions}
-                            value={selectedProduct}
-                            onChange={setSelectedProduct}
-                            placeholder="Seleccione un producto"
-                            searchPlaceholder="Buscar producto..."
-                            />
-                        </div>
-                        <div>
-                        <Label>Cantidad</Label>
-                        <Input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} min="1"/>
-                        </div>
-                        <div>
-                        <Label>Precio Unit.</Label>
-                        <Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} step="0.01" min="0"/>
-                        </div>
-                        <div className="flex flex-col items-center justify-center pt-6">
-                            <Label htmlFor="appliesIvaSwitch" className="mb-2">Aplica IVA</Label>
-                            <Switch id="appliesIvaSwitch" checked={appliesIva} onCheckedChange={setAppliesIva} />
-                        </div>
-                        <div>
-                        <Button type="button" onClick={handleAddDetalle} className="w-full">
-                            <PlusCircle className="mr-2 h-4 w-4"/> Añadir
-                        </Button>
-                        </div>
-                    </div>
+                      <h3 className="text-lg font-medium">Detalles de la Factura</h3>
+                      {/* Add Detail Form */}
+                      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end p-4 border rounded-lg">
+                          <div className="md:col-span-2">
+                          <Label>Producto</Label>
+                          <Combobox
+                              options={productOptions}
+                              value={selectedProduct}
+                              onChange={setSelectedProduct}
+                              placeholder="Seleccione un producto"
+                              searchPlaceholder="Buscar producto..."
+                              />
+                          </div>
+                          <div>
+                          <Label>Cantidad</Label>
+                          <Input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} min="1"/>
+                          </div>
+                          <div>
+                          <Label>Precio Unit.</Label>
+                          <Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} step="0.01" min="0"/>
+                          </div>
+                          <div className="flex flex-col items-center justify-center pt-6">
+                              <Label htmlFor="appliesIvaSwitch" className="mb-2">Aplica IVA</Label>
+                              <Switch id="appliesIvaSwitch" checked={appliesIva} onCheckedChange={setAppliesIva} />
+                          </div>
+                          <div>
+                          <Button type="button" onClick={handleAddDetalle} className="w-full">
+                              <PlusCircle className="mr-2 h-4 w-4"/> Añadir
+                          </Button>
+                          </div>
+                      </div>
 
-                    {/* Details Table */}
-                    <div className="border rounded-lg overflow-hidden">
-                        <Table>
-                        <TableHeader>
-                            <TableRow>
-                            <TableHead>Producto</TableHead>
-                            <TableHead className="text-right">Cantidad</TableHead>
-                            <TableHead className="text-right">P. Unitario</TableHead>
-                            <TableHead className="text-right">Subtotal</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
-                            <TableHead>Acciones</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {detalles.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={6} className="text-center h-24">Aún no se han añadido productos.</TableCell>
-                            </TableRow>
-                            ) : (
-                            detalles.map((d, index) => (
-                                <TableRow key={index}>
-                                <TableCell>{d.nombre_producto}</TableCell>
-                                <TableCell className="text-right">{d.cantidad}</TableCell>
-                                <TableCell className="text-right">${d.precio_unitario.toFixed(2)}</TableCell>
-                                <TableCell className="text-right">${d.subtotal.toFixed(2)}</TableCell>
-                                <TableCell className="text-right font-medium">${d.total.toFixed(2)}</TableCell>
-                                <TableCell>
-                                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveDetalle(index)}>
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </TableCell>
-                                </TableRow>
-                            ))
-                            )}
-                        </TableBody>
-                        </Table>
-                    </div>
+                      {/* Details Table */}
+                      <div className="border rounded-lg overflow-hidden">
+                          <Table>
+                          <TableHeader>
+                              <TableRow>
+                              <TableHead>Producto</TableHead>
+                              <TableHead className="text-right">Cantidad</TableHead>
+                              <TableHead className="text-right">P. Unitario</TableHead>
+                              <TableHead className="text-right">Subtotal</TableHead>
+                              <TableHead className="text-right">Total</TableHead>
+                              <TableHead>Acciones</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {detalles.length === 0 ? (
+                              <TableRow>
+                                  <TableCell colSpan={6} className="text-center h-24">Aún no se han añadido productos.</TableCell>
+                              </TableRow>
+                              ) : (
+                              detalles.map((d, index) => (
+                                  <TableRow key={index}>
+                                  <TableCell>{d.nombre_producto}</TableCell>
+                                  <TableCell className="text-right">{d.cantidad}</TableCell>
+                                  <TableCell className="text-right">${d.precio_unitario.toFixed(2)}</TableCell>
+                                  <TableCell className="text-right">${d.subtotal.toFixed(2)}</TableCell>
+                                  <TableCell className="text-right font-medium">${d.total.toFixed(2)}</TableCell>
+                                  <TableCell>
+                                      <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveDetalle(index)}>
+                                      <Trash2 className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                  </TableCell>
+                                  </TableRow>
+                              ))
+                              )}
+                          </TableBody>
+                          </Table>
+                      </div>
+                       {/* Financial Summary */}
+                        <div className="flex justify-end pt-4">
+                            <div className="w-full max-w-xs space-y-2">
+                                <div className="flex justify-between">
+                                <span className="text-muted-foreground">Subtotal:</span>
+                                <span className="font-medium">${totalSubtotal.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                <span className="text-muted-foreground">IVA ({IVA_RATE * 100}%):</span>
+                                <span className="font-medium">${totalIva.toFixed(2)}</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between text-lg font-bold">
+                                <span>Total:</span>
+                                <span>${granTotal.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </>
                 )}
