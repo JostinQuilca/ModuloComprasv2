@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useActionState, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -76,20 +76,6 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
     }
   }, [proveedor, form, isOpen]);
 
-  const action = isEditMode ? updateProveedor.bind(null, proveedor.cedula_ruc) : addProveedor;
-  const [state, formAction] = useActionState(action, { success: false, message: "" });
-  
-  useEffect(() => {
-    if (state.message) {
-      if (state.success) {
-        toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: state.message });
-        setIsOpen(false);
-      } else {
-        toast({ title: "Error", description: state.message, variant: "destructive" });
-      }
-    }
-  }, [state, toast, isEditMode, setIsOpen]);
-
   const onSubmit = (data: z.infer<typeof ProveedorSchema>) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
@@ -101,8 +87,17 @@ export default function ProveedorFormModal({ isOpen, setIsOpen, proveedor }: Pro
         formData.append(key, String(value));
       }
     });
-    startTransition(() => {
-      formAction(formData);
+
+    startTransition(async () => {
+      const action = isEditMode ? updateProveedor.bind(null, proveedor!.cedula_ruc) : addProveedor;
+      const result = await action(null, formData);
+
+      if (result.success) {
+        toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: result.message });
+        setIsOpen(false);
+      } else {
+        toast({ title: "Error", description: result.message, variant: "destructive" });
+      }
     });
   };
 

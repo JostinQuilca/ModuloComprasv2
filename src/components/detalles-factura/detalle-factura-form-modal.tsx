@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useActionState, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
@@ -73,21 +73,6 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
       }
   }, [selectedProductId, productos, form, isEditMode]);
 
-  const action = isEditMode ? updateDetalle.bind(null, detalle.id) : addDetalle;
-  const [state, formAction] = useActionState(action, { success: false, message: "" });
-  
-  useEffect(() => {
-    if (!isPending && state.message) {
-      if (state.success) {
-        toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: state.message });
-        setIsOpen(false);
-        router.refresh();
-      } else {
-        toast({ title: "Error", description: state.message, variant: "destructive" });
-      }
-    }
-  }, [state, isPending, toast, isEditMode, setIsOpen, router]);
-
   const onSubmit = (data: DetalleFormData) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
@@ -103,7 +88,18 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
     const nombre_producto = product ? product.nombre : (isEditMode && detalle ? detalle.nombre_producto : 'Desconocido');
     formData.append('nombre_producto', nombre_producto);
 
-    startTransition(() => formAction(formData));
+    startTransition(async () => {
+      const action = isEditMode ? updateDetalle.bind(null, detalle!.id) : addDetalle;
+      const result = await action(null, formData);
+
+      if (result.success) {
+        toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: result.message });
+        setIsOpen(false);
+        router.refresh();
+      } else {
+        toast({ title: "Error", description: result.message, variant: "destructive" });
+      }
+    });
   };
   
   const productOptions = productos.map(p => ({
