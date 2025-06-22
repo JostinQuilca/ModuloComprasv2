@@ -5,8 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { format, parseISO } from "date-fns";
-import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
-import { useRouter } from 'next/navigation';
+import { CalendarIcon, PlusCircle, Trash2, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -19,8 +18,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import type { FacturaCompra, Proveedor, Producto, FacturaDetalle } from "@/lib/types";
 import { FacturaCompraSchema } from "@/lib/types";
-import { addFactura, updateFactura, type ActionResponse as FacturaActionResponse } from "@/app/facturas/actions";
-import { addDetalle } from "@/app/detalles-factura/actions";
+import { addFactura, updateFactura, getDetallesByFacturaId, type ActionResponse as FacturaActionResponse } from "@/app/facturas/actions";
+import { addDetalle, deleteDetalle } from "@/app/detalles-factura/actions";
 import { Combobox } from "../ui/combobox";
 import { Separator } from "../ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -36,10 +35,7 @@ interface FacturaFormModalProps {
 }
 
 type FacturaFormData = z.infer<typeof FacturaCompraSchema>;
-type TempDetalle = Omit<FacturaDetalle, 'id' | 'factura_id' | 'nombre_producto'> & {
-    producto_id: number;
-    nombre_producto: string;
-};
+type ModalDetalle = FacturaDetalle & { tempId?: string };
 
 const IVA_RATE = 0.15;
 
@@ -47,8 +43,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
   const isEditMode = !!factura;
   const { toast } = useToast();
   const [isSaving, startTransition] = useTransition();
+  const [isLoadingDetails, startDetailsTransition] = useTransition();
 
-  const [detalles, setDetalles] = useState<TempDetalle[]>([]);
+  const [detalles, setDetalles] = useState<ModalDetalle[]>([]);
+  const [initialDetalles, setInitialDetalles] = useState<ModalDetalle[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string | undefined>();
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
@@ -81,12 +79,16 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
 
   useEffect(() => {
     if (isOpen) {
-      setDetalles([]);
-      if (factura) {
+      if (factura && isEditMode) {
         reset({
           ...factura,
           fecha_emision: parseISO(factura.fecha_emision),
           fecha_vencimiento: factura.fecha_vencimiento ? parseISO(factura.fecha_vencimiento) : null,
+        });
+        startDetailsTransition(async () => {
+            const existingDetails = await getDetallesByFacturaId(factura.id);
+            setDetalles(existingDetails);
+            setInitialDetalles(existingDetails);
         });
       } else {
         reset({
@@ -97,9 +99,11 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
           tipo_pago: "Contado",
           estado: "Registrada",
         });
+        setDetalles([]);
+        setInitialDetalles([]);
       }
     }
-  }, [factura, isOpen, reset]);
+  }, [factura, isOpen, isEditMode, reset]);
 
   useEffect(() => {
     if (selectedProduct) {
@@ -128,7 +132,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
     const iva = appliesIva ? subtotal * IVA_RATE : 0;
     const total = subtotal + iva;
 
-    const nuevoDetalle: TempDetalle = {
+    const nuevoDetalle: ModalDetalle = {
+      id: 0, // Placeholder
+      factura_id: 0, // Placeholder
+      tempId: `temp-${Date.now()}`,
       producto_id: product.id_producto,
       nombre_producto: product.nombre,
       cantidad: quantity,
@@ -141,15 +148,14 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
     
     setDetalles(prev => [...prev, nuevoDetalle]);
 
-    // Reset fields
     setSelectedProduct(undefined);
     setQuantity(1);
     setPrice(0);
     setAppliesIva(false);
   };
 
-  const handleRemoveDetalle = (index: number) => {
-    setDetalles(prev => prev.filter((_, i) => i !== index));
+  const handleRemoveDetalle = (idToRemove: number | undefined, tempIdToRemove: string | undefined) => {
+    setDetalles(prev => prev.filter(d => d.id ? d.id !== idToRemove : d.tempId !== tempIdToRemove));
   };
 
 
@@ -164,69 +170,65 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         }
       });
       
-      if (isEditMode) {
-        headerFormData.append('subtotal', String(factura.subtotal));
-        headerFormData.append('iva', String(factura.iva));
-        headerFormData.append('total', String(factura.total));
-
-        const result = await updateFactura(factura.id, null, headerFormData);
-        if (result.success) {
-          toast({ title: "Actualización Exitosa", description: result.message });
-          setIsOpen(false);
-        } else {
-          toast({ title: "Error", description: result.message, variant: "destructive" });
-        }
-        return;
-      }
-
-      // --- Create Mode ---
-      if (detalles.length === 0) {
-        toast({ title: "Error", description: "Debe añadir al menos un producto a la factura.", variant: "destructive"});
-        return;
-      }
-      
       headerFormData.append('subtotal', String(totalSubtotal));
       headerFormData.append('iva', String(totalIva));
       headerFormData.append('total', String(granTotal));
       
-      const headerResult: FacturaActionResponse = await addFactura(null, headerFormData);
+      if (isEditMode) {
+        const headerResult = await updateFactura(factura.id, null, headerFormData);
+        if (!headerResult.success) {
+            toast({ title: "Error al actualizar factura", description: headerResult.message, variant: "destructive" });
+            return;
+        }
 
-      if (!headerResult.success || !headerResult.factura?.id) {
-          toast({ title: "Error al crear factura", description: headerResult.message, variant: "destructive" });
-          return;
-      }
-      
-      const newFacturaId = headerResult.factura.id;
-      
-      const detailPromises = detalles.map(detalle => {
-        const detailFormData = new FormData();
-        Object.entries(detalle).forEach(([key, value]) => {
-           if (value !== null && value !== undefined) {
-                if (key === 'aplica_iva') {
-                    if (value === true) detailFormData.append(key, 'on');
-                } else {
-                    detailFormData.append(key, String(value));
+        const deletePromises = initialDetalles.map(d => deleteDetalle(d.id, d.factura_id));
+        await Promise.all(deletePromises);
+
+        const newFacturaId = factura.id;
+        const addPromises = detalles.map(detalle => {
+            const detailFormData = new FormData();
+            Object.entries(detalle).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    if (key === 'aplica_iva' && value === true) detailFormData.append(key, 'on');
+                    else if (key !== 'aplica_iva') detailFormData.append(key, String(value));
                 }
-           }
+            });
+            detailFormData.append('factura_id', String(newFacturaId));
+            return addDetalle(null, detailFormData);
         });
-        detailFormData.append('factura_id', String(newFacturaId));
-        return addDetalle(null, detailFormData);
-      });
 
-      const detailResults = await Promise.all(detailPromises);
-      const failedDetails = detailResults.filter(r => !r.success);
-
-      if (failedDetails.length > 0) {
-          toast({
-              title: "Factura Creada con Errores",
-              description: `El encabezado se guardó, pero ${failedDetails.length} de ${detalles.length} productos no se pudieron añadir.`,
-              variant: "destructive",
-              duration: 5000,
-          });
+        await Promise.all(addPromises);
+        toast({ title: "Actualización Exitosa", description: "Factura y detalles actualizados con éxito." });
       } else {
-          toast({ title: "Éxito", description: "Factura y detalles creados correctamente." });
+        // --- Create Mode ---
+        if (detalles.length === 0) {
+          toast({ title: "Error", description: "Debe añadir al menos un producto a la factura.", variant: "destructive"});
+          return;
+        }
+        const headerResult = await addFactura(null, headerFormData);
+        if (!headerResult.success || !headerResult.data?.id) {
+            toast({ title: "Error al crear factura", description: headerResult.message, variant: "destructive" });
+            return;
+        }
+        const newFacturaId = headerResult.data.id;
+        const detailPromises = detalles.map(detalle => {
+          const detailFormData = new FormData();
+          Object.entries(detalle).forEach(([key, value]) => {
+              if (value !== null && value !== undefined) {
+                  if (key === 'aplica_iva' && value === true) detailFormData.append(key, 'on');
+                  else if (key !== 'aplica_iva') detailFormData.append(key, String(value));
+              }
+          });
+          detailFormData.append('factura_id', String(newFacturaId));
+          return addDetalle(null, detailFormData);
+        });
+        const detailResults = await Promise.all(detailPromises);
+        if (detailResults.some(r => !r.success)) {
+            toast({ title: "Factura Creada con Errores", description: `El encabezado se guardó, pero algunos productos no.`, variant: "destructive" });
+        } else {
+            toast({ title: "Éxito", description: "Factura y detalles creados correctamente." });
+        }
       }
-      
       setIsOpen(false);
     });
   };
@@ -237,13 +239,12 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Factura" : "Añadir Nueva Factura"}</DialogTitle>
           <DialogDescription>
-            {isEditMode ? "Actualice los detalles de la factura." : "Ingrese los detalles de la nueva factura y añada los productos."}
+            {isEditMode ? "Actualice los detalles de la factura y sus productos." : "Ingrese los detalles de la nueva factura y añada los productos."}
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow overflow-y-auto pr-6 -mr-6">
             <Form {...form}>
             <form id="factura-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {/* Header Form */}
                 <FormField
                 control={form.control}
                 name="proveedor_cedula_ruc"
@@ -384,11 +385,8 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                             </FormControl>
                             <SelectContent>
                                 <SelectItem value="Registrada">Registrada</SelectItem>
-                                <SelectItem value="Pendiente">Pendiente</SelectItem>
-                                <SelectItem value="Pagada">Pagada</SelectItem>
                                 <SelectItem value="Impresa">Impresa</SelectItem>
                                 <SelectItem value="Cancelada">Cancelada</SelectItem>
-                                <SelectItem value="Anulada">Anulada</SelectItem>
                             </SelectContent>
                             </Select>
                             <FormMessage />
@@ -397,14 +395,10 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                     />
                 </div>
 
-                {!isEditMode && (
                 <>
                     <Separator className="my-6" />
-
-                    {/* Details Section */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-medium">Detalles de la Factura</h3>
-                      {/* Add Detail Form */}
                       <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end p-4 border rounded-lg">
                           <div className="md:col-span-2">
                           <Label>Producto</Label>
@@ -435,7 +429,6 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                           </div>
                       </div>
 
-                      {/* Details Table */}
                       <div className="border rounded-lg overflow-hidden">
                           <Table>
                           <TableHeader>
@@ -449,20 +442,22 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                               </TableRow>
                           </TableHeader>
                           <TableBody>
-                              {detalles.length === 0 ? (
+                              {isLoadingDetails ? (
+                                <TableRow><TableCell colSpan={6} className="text-center h-24"><Loader2 className="mx-auto h-6 w-6 animate-spin" /></TableCell></TableRow>
+                              ) : detalles.length === 0 ? (
                               <TableRow>
                                   <TableCell colSpan={6} className="text-center h-24">Aún no se han añadido productos.</TableCell>
                               </TableRow>
                               ) : (
-                              detalles.map((d, index) => (
-                                  <TableRow key={index}>
+                              detalles.map((d) => (
+                                  <TableRow key={d.id || d.tempId}>
                                   <TableCell>{d.nombre_producto}</TableCell>
                                   <TableCell className="text-right">{d.cantidad}</TableCell>
                                   <TableCell className="text-right">${d.precio_unitario.toFixed(2)}</TableCell>
                                   <TableCell className="text-right">${d.subtotal.toFixed(2)}</TableCell>
                                   <TableCell className="text-right font-medium">${d.total.toFixed(2)}</TableCell>
                                   <TableCell>
-                                      <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveDetalle(index)}>
+                                      <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveDetalle(d.id, d.tempId)}>
                                       <Trash2 className="h-4 w-4 text-destructive" />
                                       </Button>
                                   </TableCell>
@@ -472,7 +467,6 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                           </TableBody>
                           </Table>
                       </div>
-                       {/* Financial Summary */}
                         <div className="flex justify-end pt-4">
                             <div className="w-full max-w-xs space-y-2">
                                 <div className="flex justify-between">
@@ -492,14 +486,13 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                         </div>
                     </div>
                 </>
-                )}
             </form>
             </Form>
         </div>
 
         <DialogFooter className="pt-4 border-t">
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-            <Button type="submit" form="factura-form" disabled={isSaving}>
+            <Button type="submit" form="factura-form" disabled={isSaving || isLoadingDetails}>
             {isSaving ? "Guardando..." : (isEditMode ? "Guardar Cambios" : "Crear Factura")}
             </Button>
         </DialogFooter>

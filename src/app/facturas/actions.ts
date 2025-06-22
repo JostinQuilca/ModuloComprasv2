@@ -2,9 +2,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { FacturaCompra, FacturaCompraSchema } from "@/lib/types";
+import { FacturaCompra, FacturaCompraSchema, FacturaDetalle, Producto } from "@/lib/types";
 import { format } from 'date-fns';
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
+import { getDetalles, getProductos } from "@/lib/data";
 
 const API_URL = "https://modulocompras-production-843f.up.railway.app/api/facturas";
 
@@ -144,4 +145,19 @@ export async function deleteFactura(id: number): Promise<ActionResponse> {
   } catch (error: unknown) {
     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
   }
+}
+
+export async function getDetallesByFacturaId(facturaId: number): Promise<FacturaDetalle[]> {
+    const [allDetalles, allProductos] = await Promise.all([getDetalles(), getProductos()]);
+    
+    const productoMap = new Map(allProductos.map(p => [p.id_producto, p.nombre]));
+    
+    const facturaDetalles = allDetalles.filter(d => d.factura_id === facturaId);
+
+    const detallesConNombres = facturaDetalles.map(detalle => ({
+      ...detalle,
+      nombre_producto: productoMap.get(detalle.producto_id) || 'Producto no encontrado'
+    }));
+
+    return detallesConNombres;
 }

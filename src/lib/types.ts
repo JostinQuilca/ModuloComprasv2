@@ -51,7 +51,7 @@ export const FacturaCompraSchema = z.object({
   subtotal: z.number().optional().default(0),
   iva: z.number().optional().default(0),
   total: z.number().optional().default(0),
-  estado: z.enum(["Registrada", "Impresa", "Cancelada", "Pendiente", "Pagada", "Anulada"]),
+  estado: z.enum(["Registrada", "Impresa", "Cancelada"]),
 });
 
 export type FacturaCompra = {
@@ -65,8 +65,7 @@ export type FacturaCompra = {
   subtotal: number;
   iva: number;
   total: number;
-  // Allow multiple states to be compatible with potential API responses during transition
-  estado: 'Registrada' | 'Impresa' | 'Cancelada' | 'Pendiente' | 'Pagada' | 'Anulada';
+  estado: 'Registrada' | 'Impresa' | 'Cancelada';
   fecha_creacion?: string;
   usuario_creacion?: number;
 };
