@@ -1,11 +1,14 @@
-
 "use server";
 
 import { revalidatePath } from "next/cache";
 import { ProveedorSchema } from "@/lib/types";
-import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
+import {
+  formatZodErrors,
+  handleApiError,
+  type ActionResponse,
+} from "@/lib/actions-utils";
 
-const API_URL = "https://modulocompras-production-843f.up.railway.app/api/proveedores";
+const API_URL = "https://modulocompras.onrender.com/api/proveedores";
 
 export async function addProveedor(
   prevState: any,
@@ -23,10 +26,10 @@ export async function addProveedor(
       message: formatZodErrors(validatedFields.error),
     };
   }
-  
+
   const dataToSubmit = {
-      ...validatedFields.data,
-      usuario_creacion: 1, // Mock user ID
+    ...validatedFields.data,
+    usuario_creacion: 1, // Mock user ID
   };
 
   try {
@@ -39,14 +42,20 @@ export async function addProveedor(
     });
 
     if (!response.ok) {
-       await handleApiError(response, 'Error al crear el proveedor.');
+      await handleApiError(response, "Error al crear el proveedor.");
     }
 
     revalidatePath("/");
     revalidatePath("/proveedores");
     return { success: true, message: "Proveedor añadido con éxito." };
   } catch (error: unknown) {
-    return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error desconocido.",
+    };
   }
 }
 
@@ -62,17 +71,17 @@ export async function updateProveedor(
   });
 
   if (!validatedFields.success) {
-     return {
+    return {
       success: false,
       message: formatZodErrors(validatedFields.error),
     };
   }
 
   const dataToSubmit = {
-      ...validatedFields.data,
-      usuario_modificacion: 1, // Mock user ID
+    ...validatedFields.data,
+    usuario_modificacion: 1, // Mock user ID
   };
-  
+
   try {
     const response = await fetch(`${API_URL}/${cedula_ruc}`, {
       method: "PUT",
@@ -83,31 +92,45 @@ export async function updateProveedor(
     });
 
     if (!response.ok) {
-      await handleApiError(response, 'Error al actualizar el proveedor.');
+      await handleApiError(response, "Error al actualizar el proveedor.");
     }
-    
+
     revalidatePath("/");
     revalidatePath("/proveedores");
     return { success: true, message: "Proveedor actualizado con éxito." };
   } catch (error: unknown) {
-     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error desconocido.",
+    };
   }
 }
 
-export async function deleteProveedor(cedula_ruc: string): Promise<ActionResponse> {
+export async function deleteProveedor(
+  cedula_ruc: string
+): Promise<ActionResponse> {
   try {
     const response = await fetch(`${API_URL}/${cedula_ruc}`, {
       method: "DELETE",
     });
 
     if (!response.ok) {
-      await handleApiError(response, 'Error al eliminar el proveedor.');
+      await handleApiError(response, "Error al eliminar el proveedor.");
     }
 
     revalidatePath("/");
     revalidatePath("/proveedores");
     return { success: true, message: "Proveedor eliminado con éxito." };
   } catch (error: unknown) {
-    return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error desconocido.",
+    };
   }
 }

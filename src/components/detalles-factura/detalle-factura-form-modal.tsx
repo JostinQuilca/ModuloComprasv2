@@ -4,10 +4,24 @@ import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -27,7 +41,13 @@ interface DetalleFacturaFormModalProps {
 
 type DetalleFormData = z.infer<typeof FacturaDetalleSchema>;
 
-export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, facturaId, productos }: DetalleFacturaFormModalProps) {
+export default function DetalleFacturaFormModal({
+  isOpen,
+  setIsOpen,
+  detalle,
+  facturaId,
+  productos,
+}: DetalleFacturaFormModalProps) {
   const isEditMode = !!detalle;
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -63,57 +83,76 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
       });
     }
   }, [detalle, facturaId, form, isOpen, isEditMode]);
-  
+
   useEffect(() => {
-      if (selectedProductId && !isEditMode) {
-          const product = productos.find(p => p.id_producto === selectedProductId);
-          if (product) {
-              form.setValue('precio_unitario', parseFloat(product.precio_unitario));
-          }
+    if (selectedProductId && !isEditMode) {
+      const product = productos.find(
+        (p) => p.id_producto === selectedProductId
+      );
+      if (product) {
+        form.setValue("precio_unitario", parseFloat(product.precio_unitario));
       }
+    }
   }, [selectedProductId, productos, form, isEditMode]);
 
   const onSubmit = (data: DetalleFormData) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      if (key === 'aplica_iva') {
-          if (value === true) formData.append(key, 'on');
+      if (key === "aplica_iva") {
+        // Only append 'on' if it's true, otherwise don't append
+        if (value === true) formData.append(key, "on");
       } else if (value !== null && value !== undefined) {
         formData.append(key, String(value));
       }
     });
 
-    // Find the product name and add it to the form data
-    const product = productos.find(p => p.id_producto === data.producto_id);
-    const nombre_producto = product ? product.nombre : (isEditMode && detalle ? detalle.nombre_producto : 'Desconocido');
-    formData.append('nombre_producto', nombre_producto);
+    const product = productos.find((p) => p.id_producto === data.producto_id);
+    const nombre_producto = product
+      ? product.nombre
+      : isEditMode && detalle
+      ? detalle.nombre_producto
+      : "Desconocido";
+    formData.append("nombre_producto", nombre_producto);
 
     startTransition(async () => {
-      const action = isEditMode ? updateDetalle.bind(null, detalle!.id) : addDetalle;
+      const action = isEditMode
+        ? updateDetalle.bind(null, detalle!.id)
+        : addDetalle;
       const result = await action(null, formData);
 
       if (result.success) {
-        toast({ title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa", description: result.message });
+        toast({
+          title: isEditMode ? "Actualización Exitosa" : "Creación Exitosa",
+          description: result.message,
+        });
         setIsOpen(false);
         router.refresh();
       } else {
-        toast({ title: "Error", description: result.message, variant: "destructive" });
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive",
+        });
       }
     });
   };
-  
-  const productOptions = productos.map(p => ({
+
+  const productOptions = productos.map((p) => ({
     value: String(p.id_producto),
-    label: `[${p.codigo}] ${p.nombre}`
+    label: `[${p.codigo}] ${p.nombre}`,
   }));
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? "Editar Producto" : "Añadir Producto a Factura"}</DialogTitle>
-           <DialogDescription>
-            {isEditMode ? "Actualice los detalles del producto." : "Seleccione un producto y añada los detalles."}
+          <DialogTitle>
+            {isEditMode ? "Editar Producto" : "Añadir Producto a Factura"}
+          </DialogTitle>
+          <DialogDescription>
+            {isEditMode
+              ? "Actualice los detalles del producto."
+              : "Seleccione un producto y añada los detalles."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -125,49 +164,49 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
                 <FormItem className="flex flex-col">
                   <FormLabel>Producto</FormLabel>
                   <FormControl>
-                     <Combobox
-                        options={productOptions}
-                        value={field.value ? String(field.value) : undefined}
-                        onChange={(value) => field.onChange(Number(value))}
-                        placeholder="Seleccione un producto"
-                        searchPlaceholder="Buscar producto por nombre o código..."
-                        emptyPlaceholder="No se encontró ningún producto."
-                        disabled={isEditMode}
-                      />
+                    <Combobox
+                      options={productOptions}
+                      value={field.value ? String(field.value) : undefined}
+                      onChange={(value) => field.onChange(Number(value))}
+                      placeholder="Seleccione un producto"
+                      searchPlaceholder="Buscar producto por nombre o código..."
+                      emptyPlaceholder="No se encontró ningún producto."
+                      disabled={isEditMode}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="cantidad"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cantidad</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="precio_unitario"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Precio Unitario</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.01" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="cantidad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cantidad</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="precio_unitario"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Precio Unitario</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-             <FormField
+            <FormField
               control={form.control}
               name="aplica_iva"
               render={({ field }) => (
@@ -183,8 +222,16 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={isPending}>{isPending ? "Guardando..." : "Guardar"}</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Guardando..." : "Guardar"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

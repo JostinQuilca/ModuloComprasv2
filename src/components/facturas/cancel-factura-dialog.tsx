@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -12,30 +11,33 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface DeleteFacturaDialogProps {
+interface CancelFacturaDialogProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   onConfirm: () => void;
   facturaNumero?: string;
 }
 
-export default function DeleteFacturaDialog({
+export default function CancelFacturaDialog({
   isOpen,
   setIsOpen,
   onConfirm,
   facturaNumero,
-}: DeleteFacturaDialogProps) {
+}: CancelFacturaDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás completamente seguro?</AlertDialogTitle>
+          <AlertDialogTitle>
+            ¿Está seguro que desea cancelar la factura?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción no se puede deshacer. Esto eliminará permanentemente la factura "{facturaNumero || "seleccionada"}" y todos sus detalles.
+            Esta acción no se puede deshacer. Esto cambiará el estado de la
+            factura "{facturaNumero || "seleccionada"}" a "Cancelada".
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel>Volver</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
@@ -43,7 +45,7 @@ export default function DeleteFacturaDialog({
             }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Continuar
+            Confirmar Cancelación
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
