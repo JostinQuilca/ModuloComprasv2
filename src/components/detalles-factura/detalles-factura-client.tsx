@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft, PlusCircle, Pencil, Trash2, Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 import type {
   FacturaCompra,
@@ -32,6 +33,7 @@ import type {
 } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { deleteDetalle } from "@/app/detalles-factura/actions";
+import { printFactura } from "@/app/facturas/actions";
 import DetalleFacturaFormModal from "./detalle-factura-form-modal";
 import DeleteDetalleDialog from "./delete-detalle-dialog";
 import FacturaFormModal from "../facturas/factura-form-modal";
@@ -90,6 +92,7 @@ export default function DetallesFacturaClient({
   const { toast } = useToast();
   const router = useRouter();
   const [detalles, setDetalles] = React.useState(initialDetalles);
+  const [isPrinting, startPrinting] = useTransition();
 
   const [isDetalleModalOpen, setDetalleModalOpen] = React.useState(false);
   const [editingDetalle, setEditingDetalle] =
@@ -144,6 +147,28 @@ export default function DetallesFacturaClient({
     setDeletingDetalle(null);
   };
 
+  const handlePrint = () => {
+    startPrinting(async () => {
+      const result = await printFactura(factura.id);
+      if (result.success) {
+        toast({
+          title: "Estado actualizado",
+          description: "La factura está lista para imprimir.",
+        });
+        window.open(
+          `/facturas/vista?factura_id=${factura.id}&autoprint=true`,
+          "_blank"
+        );
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
   const isModificationDisabled =
     factura.estado === "Impresa" || factura.estado === "Cancelada";
 
@@ -159,6 +184,16 @@ export default function DetallesFacturaClient({
         <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
           Gestionar Detalles de Factura
         </h1>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            onClick={handlePrint}
+            variant="outline"
+            size="sm"
+            disabled={isPrinting || factura.estado === "Cancelada"}
+          >
+            {isPrinting ? "Procesando..." : "Imprimir"}
+          </Button>
+        </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
