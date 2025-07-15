@@ -3,10 +3,13 @@ import type {
   FacturaDetalle,
   Producto,
   Proveedor,
+  AuditoriaLog,
 } from "@/lib/types";
 
 const API_BASE_URL_COMPRAS = "https://modulocompras.onrender.com/api";
 const API_BASE_URL_AD = "https://ad-xglt.onrender.com/api/v1";
+const API_BASE_URL_SEGURIDAD =
+  "https://aplicacion-de-seguridad-v2.onrender.com/api";
 
 async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {
   try {
@@ -160,4 +163,17 @@ export async function getDetallesByFacturaId(
   }));
 
   return detallesConNombres;
+}
+
+export async function getAuditoriaLogs(): Promise<AuditoriaLog[]> {
+  const data = await fetchData<AuditoriaLog[]>(
+    `${API_BASE_URL_SEGURIDAD}/auditoria`,
+    []
+  );
+  if (!Array.isArray(data)) {
+    console.error("API response for auditoria is not an array:", data);
+    return [];
+  }
+  // Filter to only show logs from the 'compras' module
+  return data.filter((log) => log.modulo.toLowerCase() === "compras");
 }
